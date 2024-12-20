@@ -1,6 +1,19 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "material": {
+          "certpath": "C:/Users/c84381641/.ohos/config/openharmony/default_app-PlayScout_tlJ51jaj2n91ZY3GuJA5gbECM4kyPhZrBSYZiUZF_rY=.cer",
+          "storePassword": "0000001BE86E8B76778B22696313588C57186757C2079D76573A7B74CB7DF0F9AFF211EE09C047144679F0",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B04A847B693C6C89AAEC8E400E680740314AB26384D732617B47558C8F698920DD8E1938E816BE6",
+          "profile": "C:/Users/c84381641/.ohos/config/openharmony/default_app-PlayScout_tlJ51jaj2n91ZY3GuJA5gbECM4kyPhZrBSYZiUZF_rY=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:/Users/c84381641/.ohos/config/openharmony/default_app-PlayScout_tlJ51jaj2n91ZY3GuJA5gbECM4kyPhZrBSYZiUZF_rY=.p12"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",

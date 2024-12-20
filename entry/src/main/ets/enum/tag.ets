@@ -1,0 +1,52 @@
+import { DEFAULT } from '@ohos/hypium'
+
+enum Tag {
+  mmorpg,
+  shooter,
+  strategy,
+  moba,
+  racing,
+  sports,
+  social,
+  sandbox,
+  survival,
+  pvp,
+  pve,
+  pixel,
+  voxel,
+  zombie,
+  tank,
+  space,
+  sailing,
+  superhero,
+  permadeath,
+  card,
+  mmo,
+  mmofps,
+  mmotps,
+  three_d, //3d
+  two_d, //2d
+  anime,
+  fantasy,
+  fighting,
+  action,
+  military,
+  flight,
+  horror,
+  mmorts,
+  low_spec,
+  tower_defense,
+  open_world,
+  martial_arts,
+  turn_based,
+  action_rpg,
+  sci_fi,
+  battle_royale,
+  first_person,
+  third_Person,
+  top_down,
+  side_scroller,
+}
+
+
+export default Tag
