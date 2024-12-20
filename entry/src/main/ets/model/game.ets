@@ -1,18 +1,18 @@
 import Platform from '../enum/platform'
 import Tag from '../enum/tag'
 
-interface Game {
-  id: number
-  title: string
-  thumbnail: string
-  short_description: string
-  game_url: string
-  genre: Tag
-  platform: Platform
-  publisher: string
-  developer: string
-  release_date: string
-  freetogame_profile_url: string
+class Game {
+  id: number = 0
+  title: string = ''
+  thumbnail: string = ''
+  short_description: string = ''
+  game_url: string = ''
+  genre: Tag = Tag.mmorpg
+  platform: Platform = Platform.pc
+  publisher: string = ''
+  developer: string = ''
+  release_date: string = ''
+  freetogame_profile_url: string = ''
 }
 
 interface Min_System_Requirements {

@@ -28,6 +28,9 @@ const GameList_URL: string = BASE_URL + '/games'
 //Games by platform
 const Game_By_Platform_URL: string = BASE_URL + `/games?platform=${platform_name}`
 
+// Games by release date
+const Game_By_ReleaseDate_URL: string = BASE_URL + `/games?sort-by=release-date`
+
 //Games by category or tag
 const Game_By_CategoryOrTag_URL: string = BASE_URL + `/games?category=${tag_name}`
 
@@ -65,6 +68,26 @@ class GameDataSource {
     });
   }
 
+  // Get top 5 recent games
+  async GetRecentGames(): Promise<Game[]> {
+    // 返回一个 Promise 来确保异步请求的结果可以正确传递
+    return new Promise<Game[]>((resolve, reject) => {
+      let httpRequest = http.createHttp()
+      httpRequest.request(Game_By_ReleaseDate_URL, (err, data) => {
+        if (!err) {
+          try {
+            let responseData: Game[] = JSON.parse(data.result as string)
+            let topFiveGames = responseData.slice(0, 5);
+            resolve(topFiveGames); // 请求成功，返回数据
+          } catch (error) {
+            reject('Failed to parse response data'); // 捕获解析错误
+          }
+        } else {
+          reject('Error: ' + err); // 请求失败，返回错误
+        }
+      });
+    });
+  }
 
   async fetchHttpCode(): Promise<number> {
     try {

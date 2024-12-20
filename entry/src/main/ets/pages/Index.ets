@@ -1,5 +1,6 @@
 import { GameDataSource, MyDataSource } from '../data/DataSource'
 import { Game } from '../model/game'
+import router from '@ohos.router'
 
 @Entry
 @Component
@@ -7,6 +8,11 @@ struct Index {
   @State httpCode: number = 0
   @State dataSet: MyDataSource = new MyDataSource()
   @State gameList: Game[] = []
+  // Recent released 5 games
+  private recent_games: Game[] = []
+  @State recent_games_thumbnails: string[] = []
+  private swiperController: SwiperController = new SwiperController()
+  private swiperMargin: number = 10
 
   aboutToAppear(): void {
     const source = new GameDataSource()
@@ -15,13 +21,16 @@ struct Index {
       this.httpCode = code
 
       if (code === 200) {
-        const list = await source.GetGameList()
-        this.gameList = list;
+        this.gameList = await source.GetGameList()
+        const recent_games = await source.GetRecentGames()
+        this.recent_games = recent_games
+
+        await Promise.all(recent_games); // 等待所有异步任务完成
 
         // 初始化数据和图片 URL
-        this.gameList.forEach((item, index) => {
+        this.recent_games.forEach((item, index) => {
           this.dataSet.pushData(item);
-          console.info(`Game info:${item.title}`)
+          this.recent_games_thumbnails[index] = item.thumbnail
         });
       } else {
         console.error('Failed to fetch data: HTTP Code', code);
@@ -45,8 +54,8 @@ struct Index {
     .width(45)
     .height(45)
     .margin({
-      right:10,
-      bottom:5
+      right: 10,
+      bottom: 5
     })
     .backdropBlur(20)
   }
@@ -54,7 +63,7 @@ struct Index {
   build() {
     Stack({ alignContent: Alignment.BottomEnd }) {
       Column() {
-        Row(){
+        Row() {
           // Title Bar
 
           Row() {
@@ -72,8 +81,35 @@ struct Index {
         .width('100%')
         .height('10%')
 
-        // Slider Component
-        // todo: Add Slider component
+        // Swiper Component
+        Swiper(this.swiperController) {
+          Image(this.recent_games_thumbnails[0])
+            .swiperImageStyle(this.recent_games[0])
+          Image(this.recent_games_thumbnails[1])
+            .swiperImageStyle(this.recent_games[1])
+          Image(this.recent_games_thumbnails[2])
+            .swiperImageStyle(this.recent_games[2])
+          Image(this.recent_games_thumbnails[3])
+            .swiperImageStyle(this.recent_games[3])
+          Image(this.recent_games_thumbnails[4])
+            .swiperImageStyle(this.recent_games[4])
+        }
+        .cachedCount(3)
+        .index(0)
+        .autoPlay(true)
+        .interval(5000)
+        .indicator(true)
+        .loop(true)
+        .duration(1000)
+        .itemSpace(20)
+        .curve(Curve.Linear)
+        .onChange((index: number) => {
+          console.info(index.toString())
+          // console.info(getContext(this).resourceManager.getStringSync($r('app.string.search')).toString())
+        })
+        .margin({ top: 10 })
+        .prevMargin(this.swiperMargin)
+        .nextMargin(this.swiperMargin)
 
         // Category Bar
         // todo: Add Catefory bar
@@ -89,7 +125,7 @@ struct Index {
         this.floatIconBuilder($r('app.media.icon_badge'))
         this.floatIconBuilder($r('app.media.icon_search'))
       }
-      .margin({right: 20, bottom: 20})
+      .margin({ right: 20, bottom: 20 })
 
     }
     .width('100%')
@@ -103,4 +139,22 @@ function titleTextStyle(fontColor: string | ResourceColor) {
   .fontSize(28)
   .fontWeight(FontWeight.Bold)
   .fontColor(fontColor)
+}
+
+@Extend(Image)
+function swiperImageStyle(game: Game) {
+  .width('100%')
+  .height(180)
+  .borderRadius(15)
+
+  // Trigger click event which will navigates to game detail page
+  .onClick(()=>{
+    router.pushUrl({
+      url:'pages/GameDetail',
+      // todo: pass parameter for
+      params:{
+        game: game
+      }
+    })
+  })
 }
