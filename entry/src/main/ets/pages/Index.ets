@@ -153,7 +153,7 @@ function swiperImageStyle(game: Game) {
       url:'pages/GameDetail',
       // todo: pass parameter for
       params:{
-        game: game
+        game_id: game.id
       }
     })
   })

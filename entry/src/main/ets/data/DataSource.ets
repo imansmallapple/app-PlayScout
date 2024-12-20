@@ -1,4 +1,4 @@
-import { Game } from '../model/game'
+import { Game, GameDetails, Min_System_Requirements, ScreenShot } from '../model/game'
 import http from '@ohos.net.http'
 
 const platform_name: string = 'pc'
@@ -37,8 +37,8 @@ const Game_By_CategoryOrTag_URL: string = BASE_URL + `/games?category=${tag_name
 //Sort games by release date, alphabetical or relevance
 const Game_By_DateOrAlphabetOrRelevance_URL: string = BASE_URL + `/games?sort-by=${sortBy}`
 
-//Return details from a specific game
-const Get_Game_URL: string = BASE_URL + `/game?id=${game_id}`
+//Return details from a specific game, need plus ${game_id}
+const Get_Game_URL: string = BASE_URL + `/game?id=`
 
 //personalized results
 const Filter_Game_PersonalizedResult_URL: string = BASE_URL + `/filter?tag=${multiple_tag}`
@@ -89,6 +89,26 @@ class GameDataSource {
     });
   }
 
+  // Get top 5 recent games
+  async GetGamesDetail(game_id: number): Promise<GameDetails> {
+    // 返回一个 Promise 来确保异步请求的结果可以正确传递
+    return new Promise<GameDetails>((resolve, reject) => {
+      let httpRequest = http.createHttp()
+      httpRequest.request(`${Get_Game_URL}${game_id}`, (err, data) => {
+        if (!err) {
+          try {
+            let responseData: GameDetails = JSON.parse(data.result as string)
+            resolve(responseData);
+          } catch (error) {
+            reject('Failed to parse response data');
+          }
+        } else {
+          reject('Error: ' + err);
+        }
+      });
+    });
+  }
+
   async fetchHttpCode(): Promise<number> {
     try {
       let httpRequest = http.createHttp();
@@ -101,10 +121,10 @@ class GameDataSource {
           }
         });
       });
-      return response; // 返回响应码
+      return response;
     } catch (error) {
       console.error('Error fetching HTTP code:', error);
-      return -1; // 返回一个错误码
+      return -1;
     }
   }
 }
@@ -122,7 +142,6 @@ class BasicDataSource implements IDataSource {
     return this.originDataArray[index];
   }
 
-  // 该方法为框架侧调用，为LazyForEach组件向其数据源处添加listener监听
   registerDataChangeListener(listener: DataChangeListener): void {
     if (this.listeners.indexOf(listener) < 0) {
       console.info('add listener');
@@ -130,7 +149,6 @@ class BasicDataSource implements IDataSource {
     }
   }
 
-  // 该方法为框架侧调用，为对应的LazyForEach组件在数据源处去除listener监听
   unregisterDataChangeListener(listener: DataChangeListener): void {
     const pos = this.listeners.indexOf(listener);
     if (pos >= 0) {
@@ -139,35 +157,30 @@ class BasicDataSource implements IDataSource {
     }
   }
 
-  // 通知LazyForEach组件需要重载所有子组件
   notifyDataReload(): void {
     this.listeners.forEach(listener => {
       listener.onDataReloaded();
     })
   }
 
-  // 通知LazyForEach组件需要在index对应索引处添加子组件
   notifyDataAdd(index: number): void {
     this.listeners.forEach(listener => {
       listener.onDataAdd(index);
     })
   }
 
-  // 通知LazyForEach组件在index对应索引处数据有变化，需要重建该子组件
   notifyDataChange(index: number): void {
     this.listeners.forEach(listener => {
       listener.onDataChange(index);
     })
   }
 
-  // 通知LazyForEach组件需要在index对应索引处删除该子组件
   notifyDataDelete(index: number): void {
     this.listeners.forEach(listener => {
       listener.onDataDelete(index);
     })
   }
 
-  // 通知LazyForEach组件将from索引和to索引处的子组件进行交换
   notifyDataMove(from: number, to: number): void {
     this.listeners.forEach(listener => {
       listener.onDataMove(from, to);

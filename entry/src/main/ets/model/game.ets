@@ -15,12 +15,12 @@ class Game {
   freetogame_profile_url: string = ''
 }
 
-interface Min_System_Requirements {
-  os: string
-  processor: string
-  memory: string
-  graphics: string
-  storage: string
+class Min_System_Requirements {
+  os: string = ''
+  processor: string = ''
+  memory: string = ''
+  graphics: string = ''
+  storage: string = ''
 }
 
 interface ScreenShot {
@@ -28,10 +28,20 @@ interface ScreenShot {
   image: string
 }
 
-interface GameDetail {
-  game: Game
-  min_requirements: Min_System_Requirements
-  screenshots: ScreenShot[]
+class GameDetails {
+  id: number = 0
+  title: string = ''
+  thumbnail: string = ''
+  short_description: string = ''
+  game_url: string = ''
+  genre: Tag = Tag.mmorpg
+  platform: Platform = Platform.pc
+  publisher: string = ''
+  developer: string = ''
+  release_date: string = ''
+  freetogame_profile_url: string = ''
+  min_requirements: Min_System_Requirements = new Min_System_Requirements()
+  screenshots: ScreenShot[] = []
 }
 
-export { Game, GameDetail, ScreenShot, Min_System_Requirements }
+export { Game, GameDetails, ScreenShot, Min_System_Requirements }
