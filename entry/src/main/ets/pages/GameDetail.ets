@@ -32,25 +32,23 @@ struct GameDetail {
   }
 
   build() {
-    Row() {
-      Column() {
-        List({ scroller: this.scroller }) {
-          ForEach(this.screenshots, (item: ScreenShot, index: number) => {
-            ListItem() {
-              Column() {
-                Image(`${item.image}`)
-                  .objectFit(ImageFit.Contain)
-                  .margin(5)
-              }
-              .width('100%')
-              .height('100%')
+    Scroll() {
+      List({ scroller: this.scroller }) {
+        ForEach(this.screenshots, (item: ScreenShot, index: number) => {
+          ListItem() {
+            Column() {
+              Image(`${item.image}`)
+                .objectFit(ImageFit.Contain)
+                .margin({ left: 5, right: 5, bottom: 5 })
+                .borderRadius(5)
             }
-          })
-        }
-        .listDirection(Axis.Horizontal)
+            .width('100%')
+          }
+        })
       }
-      .width('100%')
+      .alignSelf(ItemAlign.Start)
     }
+    .width('100%')
     .height('100%')
   }
 }
