@@ -54,7 +54,32 @@ struct Index {
   build() {
     Stack({ alignContent: Alignment.BottomEnd }) {
       Column() {
+        Row(){
+          // Title Bar
 
+          Row() {
+            Text('PLAY')
+              .titleTextStyle('#ff000000')
+
+            Text('ES')
+              .titleTextStyle('#A65EEA')
+
+            Text('COUT')
+              .titleTextStyle('#ff000000')
+          }
+        }
+        .justifyContent(FlexAlign.Center)
+        .width('100%')
+        .height('10%')
+
+        // Slider Component
+        // todo: Add Slider component
+
+        // Category Bar
+        // todo: Add Catefory bar
+
+        // About Author
+        // todo: Add author information
       }
       .width('100%')
       .height('100%')
@@ -71,4 +96,11 @@ struct Index {
     .height('100%')
     .backgroundColor(Color.White)
   }
+}
+
+@Extend(Text)
+function titleTextStyle(fontColor: string | ResourceColor) {
+  .fontSize(28)
+  .fontWeight(FontWeight.Bold)
+  .fontColor(fontColor)
 }
