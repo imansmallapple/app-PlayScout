@@ -151,7 +151,6 @@ function swiperImageStyle(game: Game) {
   .onClick(()=>{
     router.pushUrl({
       url:'pages/GameDetail',
-      // todo: pass parameter for
       params:{
         game_id: game.id
       }
