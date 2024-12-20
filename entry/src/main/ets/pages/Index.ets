@@ -30,10 +30,45 @@ struct Index {
 
   }
 
-  build() {
-    Row(){
-      Text("PLAY SCOUT")
-      Text(`Http code: ${this.httpCode}`)
+  @Builder
+  floatIconBuilder(icon: Resource) {
+    Row() {
+      Image(icon)
+        .width(20)
+        .height(20)
+        .zIndex(1)
+        .objectFit(ImageFit.Contain)
     }
+    .justifyContent(FlexAlign.Center)
+    .backgroundColor('#33000000')
+    .borderRadius(30)
+    .width(45)
+    .height(45)
+    .margin({
+      right:10,
+      bottom:5
+    })
+    .backdropBlur(20)
+  }
+
+  build() {
+    Stack({ alignContent: Alignment.BottomEnd }) {
+      Column() {
+
+      }
+      .width('100%')
+      .height('100%')
+
+      Column() {
+        this.floatIconBuilder($r('app.media.icon_home'))
+        this.floatIconBuilder($r('app.media.icon_badge'))
+        this.floatIconBuilder($r('app.media.icon_search'))
+      }
+      .margin({right: 20, bottom: 20})
+
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor(Color.White)
   }
 }
