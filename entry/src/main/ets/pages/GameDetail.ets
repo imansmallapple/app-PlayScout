@@ -1,6 +1,6 @@
 import router from '@ohos.router';
 import { GameDataSource } from '../data/DataSource';
-import { Game, GameDetails, ScreenShot } from '../model/game';
+import { Game, GameDetails, Min_System_Requirements, ScreenShot } from '../model/game';
 import promptAction from '@ohos.promptAction';
 
 interface RouterParams {
@@ -14,14 +14,14 @@ struct GameDetail {
   private game_id: number = 0
   @State gameDetail: GameDetails = new GameDetails()
   @State screenshots: ScreenShot[] = []
+  @State min_system_requirements: Min_System_Requirements = new Min_System_Requirements()
   scroller: Scroller = new Scroller()
-  private swiperController: SwiperController = new SwiperController()
   @State selectedIndex: number = 0
-  //@State isScaling: boolean = true;
   @State imgScale: number = 1;
   currentScale: number = 1;
   @State isSelected: boolean = false
   private intervalId: number | null = null; // 定时器 ID
+
 
   aboutToAppear(): void {
     const params: RouterParams = router.getParams() as RouterParams
@@ -33,7 +33,7 @@ struct GameDetail {
       if (code === 200) {
         this.gameDetail = await source.GetGamesDetail(this.game_id)
         this.screenshots = this.gameDetail.screenshots
-
+        this.min_system_requirements = this.gameDetail.minimum_system_requirements
         // 开启自动切换定时器
         this.startAutoSwitch();
       } else {
@@ -58,9 +58,115 @@ struct GameDetail {
     }
   }
 
+  @Builder
+  gameInfoComponent(title: string, name: string) {
+    Row({ space: 10 }) {
+      Column() {
+        Row() {
+          Text(title)
+            .fontColor('#61000000')
+        }
+        .width(100)
+        .margin({ left: 10 })
+      }
+
+      Column() {
+        Text(name)
+      }
+    }
+    .width('100%')
+    .justifyContent(FlexAlign.Start)
+    .margin(5)
+  }
+
   build() {
     Scroll() {
       Column() {
+
+        // Heading image
+        Row() {
+          Image(`${this.gameDetail.thumbnail}`)
+            .objectFit(ImageFit.Contain)
+        }
+
+        // Game basic information
+        Column() {
+          // Name
+          Row() {
+            Text(`${this.gameDetail.title}`)
+              .fontSize(28)
+              .fontWeight(700)
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Start)
+          .margin({ left: 10, top: 5, bottom: 5 })
+
+          // Developer, Publisher & Release Date
+          Column() {
+            Row({ space: 10 }) {
+              Column() {
+                Row() {
+                  Text('Developer')
+                    .fontColor('#61000000')
+                }
+                .width(100)
+                .margin({ left: 10 })
+              }
+
+              Column() {
+                Text(`${this.gameDetail.title}`)
+              }
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.Start)
+            .margin(5)
+
+            // Publisher
+            Row({ space: 10 }) {
+              Column() {
+                Row() {
+                  Text('Publisher')
+                    .fontColor('#61000000')
+                }
+                .width(100)
+                .margin({ left: 10 })
+              }
+
+              Column() {
+                Text(`${this.gameDetail.publisher}`)
+              }
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.Start)
+            .margin(5)
+
+            // Release date
+            Row({ space: 10 }) {
+              Column() {
+                Row() {
+                  Text('Release Date')
+                    .fontColor('#61000000')
+                }
+                .width(100)
+                .margin({ left: 10 })
+              }
+
+              Column() {
+                Text(`${this.gameDetail.release_date}`)
+              }
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.Start)
+            .margin(5)
+          }
+
+          // Short description
+          Row() {
+            Text(this.gameDetail.short_description)
+              .margin(10)
+          }
+          .width('100%')
+        }
 
         // Image screenshot detail
         Row() {
@@ -94,9 +200,103 @@ struct GameDetail {
         }
         .listDirection(Axis.Horizontal)
         .cachedCount(3)
+        .margin({bottom: 20})
+
+        // System minimum requirements
+        Column({space: 5}){
+          Row(){
+            // title
+            Text('System Requirements')
+              .fontSize(20)
+              .fontWeight(500)
+          }
+          .width('100%')
+
+          // os
+          Row({ space: 10 }) {
+            Column() {
+              Row() {
+                Text('Operating System')
+                  .fontColor('#61000000')
+              }
+              .width(75)
+              .margin({ left: 10 })
+            }
+
+            Column() {
+              Text(this.min_system_requirements?.os || 'N/A')
+                .width('75%')
+            }
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Start)
+          .margin(5)
+
+          // Processor
+          Row({ space: 10 }) {
+            Column() {
+              Row() {
+                Text('Processor')
+                  .fontColor('#61000000')
+              }
+              .width(75)
+              .margin({ left: 10 })
+            }
+
+            Column() {
+              Text(this.min_system_requirements?.processor || 'N/A')
+                .width('75%')
+            }
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Start)
+          .margin(5)
+
+          // Graphics
+          Row({ space: 10 }) {
+            Column() {
+              Row() {
+                Text('Graphics')
+                  .fontColor('#61000000')
+              }
+              .width(75)
+              .margin({ left: 10 })
+            }
+
+            Column() {
+              Text(this.min_system_requirements?.graphics || 'N/A')
+                .width('75%')
+            }
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Start)
+          .margin(5)
+
+          // Storage
+          Row({ space: 10 }) {
+            Column() {
+              Row() {
+                Text('Storage')
+                  .fontColor('#61000000')
+              }
+              .width(75)
+              .margin({ left: 10 })
+            }
+
+            Column() {
+              Text(this.min_system_requirements?.storage || 'N/A')
+                .width('75%')
+            }
+          }
+          .width('100%')
+          .justifyContent(FlexAlign.Start)
+          .margin(5)
+
+        }
       }
     }
     .width('100%')
     .height('100%')
+    .align(Alignment.Top)
   }
 }

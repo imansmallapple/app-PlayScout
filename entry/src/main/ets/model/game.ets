@@ -40,7 +40,7 @@ class GameDetails {
   developer: string = ''
   release_date: string = ''
   freetogame_profile_url: string = ''
-  min_requirements: Min_System_Requirements = new Min_System_Requirements()
+  minimum_system_requirements: Min_System_Requirements = new Min_System_Requirements()
   screenshots: ScreenShot[] = []
 }
 
