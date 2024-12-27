@@ -21,7 +21,7 @@ struct GameDetail {
   currentScale: number = 1;
   @State isSelected: boolean = false
   private intervalId: number | null = null; // 定时器 ID
-
+  @State isExpand: boolean = false
 
   aboutToAppear(): void {
     const params: RouterParams = router.getParams() as RouterParams
@@ -56,27 +56,6 @@ struct GameDetail {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
     }
-  }
-
-  @Builder
-  gameInfoComponent(title: string, name: string) {
-    Row({ space: 10 }) {
-      Column() {
-        Row() {
-          Text(title)
-            .fontColor('#61000000')
-        }
-        .width(100)
-        .margin({ left: 10 })
-      }
-
-      Column() {
-        Text(name)
-      }
-    }
-    .width('100%')
-    .justifyContent(FlexAlign.Start)
-    .margin(5)
   }
 
   build() {
@@ -159,13 +138,31 @@ struct GameDetail {
             .justifyContent(FlexAlign.Start)
             .margin(5)
           }
+          .margin({ bottom: 10 })
 
-          // Short description
+          // Description
           Row() {
-            Text(this.gameDetail.short_description)
-              .margin(10)
+            Column() {
+              if (this.isExpand) {
+                Text(this.gameDetail.description)
+                  .width('100%')
+              } else {
+                Text(this.gameDetail.description)
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .width('100%')
+                  .maxLines(10)
+              }
+              Text(this.isExpand ? 'Contract' : 'Expand')
+                .onClick(() => {
+                  this.isExpand = !this.isExpand
+                })
+                .width('100%')
+                .fontColor('#ff1e3fc6')
+            }
+            .margin({ bottom: 20 })
           }
           .width('100%')
+          .justifyContent(FlexAlign.Start)
         }
 
         // Image screenshot detail
@@ -200,11 +197,11 @@ struct GameDetail {
         }
         .listDirection(Axis.Horizontal)
         .cachedCount(3)
-        .margin({bottom: 20})
+        .margin({ bottom: 20 })
 
         // System minimum requirements
-        Column({space: 5}){
-          Row(){
+        Column({ space: 5 }) {
+          Row() {
             // title
             Text('System Requirements')
               .fontSize(20)

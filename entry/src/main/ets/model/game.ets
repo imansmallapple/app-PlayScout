@@ -33,6 +33,7 @@ class GameDetails {
   title: string = ''
   thumbnail: string = ''
   short_description: string = ''
+  description: string = ''
   game_url: string = ''
   genre: Tag = Tag.mmorpg
   platform: Platform = Platform.pc
