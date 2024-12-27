@@ -13,6 +13,7 @@ struct Index {
   @State recent_games_thumbnails: string[] = []
   private swiperController: SwiperController = new SwiperController()
   private swiperMargin: number = 10
+  @State isSelect: boolean = false
 
   aboutToAppear(): void {
     const source = new GameDataSource()
@@ -81,6 +82,15 @@ struct Index {
         .width('100%')
         .height('10%')
 
+        Row() {
+          Text('What\'s new')
+            .fontWeight(700)
+            .fontSize(28)
+            .margin({ left: 10 })
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.Start)
+
         // Swiper Component
         Swiper(this.swiperController) {
           Image(this.recent_games_thumbnails[0])
@@ -112,7 +122,22 @@ struct Index {
         .nextMargin(this.swiperMargin)
 
         // Category Bar
-        // todo: Add Catefory bar
+        // todo: Add Catefory bar, sort by alphabet tag and sort by release date tag
+        Column() {
+          Row(){
+            Text('Categories')
+              .textStyle()
+            Text('Recent Games')
+              .textStyle()
+            Text('Category')
+              .textStyle()
+          }
+          .width('100%')
+          .height(40)
+          .justifyContent(FlexAlign.SpaceEvenly)
+          .alignItems(VerticalAlign.Center)
+        }
+        .width('100%')
 
         // About Author
         // todo: Add author information
@@ -148,12 +173,18 @@ function swiperImageStyle(game: Game) {
   .borderRadius(15)
 
   // Trigger click event which will navigates to game detail page
-  .onClick(()=>{
+  .onClick(() => {
     router.pushUrl({
-      url:'pages/GameDetail',
-      params:{
+      url: 'pages/GameDetail',
+      params: {
         game_id: game.id
       }
     })
   })
+}
+
+@Extend(Text)
+function textStyle(){
+  .fontSize(20)
+  .fontWeight(600)
 }
