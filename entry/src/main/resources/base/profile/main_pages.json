@@ -2,6 +2,7 @@
   "src": [
     "pages/Index",
     "pages/Splash",
-    "pages/GameDetail"
+    "pages/GameDetail",
+    "pages/Browser"
   ]
 }

@@ -1,7 +1,6 @@
 import router from '@ohos.router';
 import { GameDataSource } from '../data/DataSource';
 import { Game, GameDetails, Min_System_Requirements, ScreenShot } from '../model/game';
-import promptAction from '@ohos.promptAction';
 
 interface RouterParams {
   game_id: number
@@ -67,6 +66,13 @@ struct GameDetail {
           Image(`${this.gameDetail.thumbnail}`)
             .objectFit(ImageFit.Contain)
         }
+        .onClick(() => {
+          router.pushUrl({ url: 'pages/Browser'
+          , params:{
+              url: this.gameDetail.game_url
+            }
+          })
+        })
 
         // Game basic information
         Column() {
@@ -162,6 +168,7 @@ struct GameDetail {
             .margin({ bottom: 20 })
           }
           .width('100%')
+          .margin({ left: 5 })
           .justifyContent(FlexAlign.Start)
         }
 
