@@ -143,6 +143,48 @@ struct GameDetail {
             .width('100%')
             .justifyContent(FlexAlign.Start)
             .margin(5)
+
+            // Platform
+            Row({ space: 10 }) {
+              Column() {
+                Row() {
+                  Text('Platform')
+                    .fontColor('#61000000')
+                }
+                .width(100)
+                .margin({ left: 10 })
+              }
+
+              Column() {
+                // todo: Add sort by platform page
+                Text(`${this.gameDetail.platform}`)
+                  .fontColor('#ff1e3fc6')
+              }
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.Start)
+            .margin(5)
+
+            // Genre
+            Row({ space: 10 }) {
+              Column() {
+                Row() {
+                  Text('Genre')
+                    .fontColor('#61000000')
+                }
+                .width(100)
+                .margin({ left: 10 })
+              }
+
+              Column() {
+                // todo: Add sort by genre page
+                Text(`${this.gameDetail.genre}`)
+                  .fontColor('#ff1e3fc6')
+              }
+            }
+            .width('100%')
+            .justifyContent(FlexAlign.Start)
+            .margin(5)
           }
           .margin({ bottom: 10 })
 
