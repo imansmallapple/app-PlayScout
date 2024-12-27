@@ -159,12 +159,12 @@ struct GameDetail {
                   .maxLines(10)
               }
               Text(this.isExpand ? 'Contract' : 'Expand')
-                .onClick(() => {
-                  this.isExpand = !this.isExpand
-                })
                 .width('100%')
                 .fontColor('#ff1e3fc6')
             }
+            .onClick(() => {
+              this.isExpand = !this.isExpand
+            })
             .margin({ bottom: 20 })
           }
           .width('100%')
