@@ -7,9 +7,9 @@ import router from '@ohos.router'
 struct Index {
   @State httpCode: number = 0
   @State dataSet: MyDataSource = new MyDataSource()
+  @State recent_games: Game[] = []
   @State gameList: Game[] = []
   // Recent released 5 games
-  private recent_games: Game[] = []
   @State recent_games_thumbnails: string[] = []
   private swiperController: SwiperController = new SwiperController()
   private swiperMargin: number = 10
@@ -22,17 +22,17 @@ struct Index {
       this.httpCode = code
 
       if (code === 200) {
-        this.gameList = await source.GetGameList()
-        const recent_games = await source.GetRecentGames()
-        this.recent_games = recent_games
+          this.gameList = await source.GetGameList()
 
-        await Promise.all(recent_games); // 等待所有异步任务完成
+          const recent_games = await source.GetRecentGames()
+          this.recent_games = recent_games
+          await Promise.all(recent_games); // 等待所有异步任务完成
 
-        // 初始化数据和图片 URL
-        this.recent_games.forEach((item, index) => {
-          this.dataSet.pushData(item);
-          this.recent_games_thumbnails[index] = item.thumbnail
-        });
+          // 初始化数据和图片 URL, 有网且第一次未渲染时
+          this.recent_games.forEach((item, index) => {
+            this.dataSet.pushData(item);
+            this.recent_games_thumbnails[index] = item.thumbnail
+          })
       } else {
         console.error('Failed to fetch data: HTTP Code', code);
       }
@@ -124,7 +124,7 @@ struct Index {
         // Category Bar
         // todo: Add Catefory bar, sort by alphabet tag and sort by release date tag
         Column() {
-          Row(){
+          Row() {
             Text('Categories')
               .textStyle()
             Text('Recent Games')
@@ -184,7 +184,7 @@ function swiperImageStyle(game: Game) {
 }
 
 @Extend(Text)
-function textStyle(){
+function textStyle() {
   .fontSize(20)
   .fontWeight(600)
 }

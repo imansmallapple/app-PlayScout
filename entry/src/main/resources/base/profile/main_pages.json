@@ -3,6 +3,7 @@
     "pages/Index",
     "pages/Splash",
     "pages/GameDetail",
-    "pages/Browser"
+    "pages/Browser",
+    "pages/StarPage"
   ]
 }

@@ -1,6 +1,9 @@
 import router from '@ohos.router';
 import { GameDataSource } from '../data/DataSource';
 import { Game, GameDetails, Min_System_Requirements, ScreenShot } from '../model/game';
+import hilog from '@ohos.hilog';
+
+PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 
 interface RouterParams {
   game_id: number
@@ -21,24 +24,28 @@ struct GameDetail {
   @State isSelected: boolean = false
   private intervalId: number | null = null; // 定时器 ID
   @State isExpand: boolean = false
+  @StorageLink('staredGames') staredGames: GameDetails[] = []
+  @State isStared: boolean = false
 
   aboutToAppear(): void {
-    const params: RouterParams = router.getParams() as RouterParams
-    this.game_id = params.game_id
+    const params: RouterParams = router.getParams() as RouterParams;
+    this.game_id = params.game_id;
 
-    const source = new GameDataSource()
+    const source = new GameDataSource();
+
     source.fetchHttpCode().then(async (code) => {
-      this.httpCode = code
+      this.httpCode = code;
       if (code === 200) {
-        this.gameDetail = await source.GetGamesDetail(this.game_id)
-        this.screenshots = this.gameDetail.screenshots
-        this.min_system_requirements = this.gameDetail.minimum_system_requirements
-        // 开启自动切换定时器
-        this.startAutoSwitch();
+        this.gameDetail = await source.GetGamesDetail(this.game_id);
+        this.screenshots = this.gameDetail.screenshots;
+        this.min_system_requirements = this.gameDetail.minimum_system_requirements;
+
+        // 检查是否已收藏
+        this.isStared = this.staredGames.some((item) => item.id === this.gameDetail.id);
       } else {
         console.error('Failed to fetch data: HTTP Code', code);
       }
-    })
+    });
   }
 
   // 定时器：每隔0.5秒切换到下一张图片
@@ -68,7 +75,7 @@ struct GameDetail {
         }
         .onClick(() => {
           router.pushUrl({ url: 'pages/Browser'
-          , params:{
+          , params: {
               url: this.gameDetail.game_url
             }
           })
@@ -77,10 +84,27 @@ struct GameDetail {
         // Game basic information
         Column() {
           // Name
-          Row() {
+          Row({ space: 10 }) {
             Text(`${this.gameDetail.title}`)
               .fontSize(28)
               .fontWeight(700)
+            Image(this.isStared === true ? $r('app.media.icon_stared') : $r('app.media.icon_not_stared'))
+              .width(20)
+              .objectFit(ImageFit.Auto)
+              .onClick(() => {
+                // Each game can only be stared once
+                this.isStared = !this.isStared
+                if (this.isStared) {
+                  this.staredGames.push(this.gameDetail)
+                } else {
+                  // Remove game from stared list using filter
+                  this.staredGames = this.staredGames.filter((item) => item.id !== this.gameDetail.id);
+                }
+                // Test stared game list data
+                // this.staredGames.forEach((item) => {
+                //   hilog.info(23, 'stared games', `${item.title}`)
+                // })
+              })
           }
           .width('100%')
           .justifyContent(FlexAlign.Start)
@@ -218,6 +242,7 @@ struct GameDetail {
         Row() {
           if (this.screenshots[0] !== undefined) {
             Image(`${this.screenshots[this.selectedIndex].image}`)
+              .margin(5)
           }
         }
 
@@ -276,6 +301,7 @@ struct GameDetail {
           }
           .width('100%')
           .justifyContent(FlexAlign.Start)
+          .alignItems(VerticalAlign.Top)
           .margin(5)
 
           // Processor
@@ -296,6 +322,7 @@ struct GameDetail {
           }
           .width('100%')
           .justifyContent(FlexAlign.Start)
+          .alignItems(VerticalAlign.Top)
           .margin(5)
 
           // Graphics
@@ -316,6 +343,7 @@ struct GameDetail {
           }
           .width('100%')
           .justifyContent(FlexAlign.Start)
+          .alignItems(VerticalAlign.Top)
           .margin(5)
 
           // Storage
@@ -336,6 +364,7 @@ struct GameDetail {
           }
           .width('100%')
           .justifyContent(FlexAlign.Start)
+          .alignItems(VerticalAlign.Top)
           .margin(5)
 
         }
