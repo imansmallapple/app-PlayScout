@@ -19,6 +19,7 @@ struct Index {
   private swiperMargin: number = 10
   @State isSortByRecentSelect: boolean = false
   @State isLoading: boolean = false
+  private scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
     this.isLoading = true;
@@ -196,7 +197,7 @@ struct Index {
           LoadComponent() // 显示加载组件
         } else {
           // Game list
-          List() {
+          List({ scroller: this.scroller }) {
             // For unknown reason, use LazyForEach with dataSet always easily crash, use ForEach instead
             ForEach(this.gameList, (item: Game) => {
               ListItem() {
@@ -262,7 +263,9 @@ struct Index {
       .height('100%')
 
       Column() {
-        this.floatIconBuilder($r('app.media.icon_home'))
+        this.floatIconBuilder($r('app.media.icon_top'), () => {
+          this.scroller.scrollEdge(Edge.Top)
+        })
         this.floatIconBuilder($r('app.media.icon_badge'), () => {
           router.pushUrl({
             url: 'pages/StarPage'
