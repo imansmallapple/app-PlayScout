@@ -1,6 +1,8 @@
 import { GameDataSource, MyDataSource } from '../data/DataSource'
-import { Game } from '../model/game'
+import { Game, GameDetails } from '../model/game'
 import router from '@ohos.router'
+import hilog from '@ohos.hilog'
+PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 
 @Entry
 @Component
@@ -41,7 +43,7 @@ struct Index {
   }
 
   @Builder
-  floatIconBuilder(icon: Resource) {
+  floatIconBuilder(icon: Resource, callback?: () => void) {
     Row() {
       Image(icon)
         .width(20)
@@ -59,6 +61,7 @@ struct Index {
       bottom: 5
     })
     .backdropBlur(20)
+    .onClick(callback)
   }
 
   build() {
@@ -147,7 +150,11 @@ struct Index {
 
       Column() {
         this.floatIconBuilder($r('app.media.icon_home'))
-        this.floatIconBuilder($r('app.media.icon_badge'))
+        this.floatIconBuilder($r('app.media.icon_badge'),()=>{
+          router.pushUrl({
+            url:'pages/StarPage'
+          })
+        })
         this.floatIconBuilder($r('app.media.icon_search'))
       }
       .margin({ right: 20, bottom: 20 })

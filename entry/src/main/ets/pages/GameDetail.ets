@@ -3,8 +3,6 @@ import { GameDataSource } from '../data/DataSource';
 import { Game, GameDetails, Min_System_Requirements, ScreenShot } from '../model/game';
 import hilog from '@ohos.hilog';
 
-PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
-
 interface RouterParams {
   game_id: number
 }
@@ -83,28 +81,30 @@ struct GameDetail {
 
         // Game basic information
         Column() {
-          // Name
-          Row({ space: 10 }) {
-            Text(`${this.gameDetail.title}`)
-              .fontSize(28)
-              .fontWeight(700)
-            Image(this.isStared === true ? $r('app.media.icon_stared') : $r('app.media.icon_not_stared'))
-              .width(20)
-              .objectFit(ImageFit.Auto)
-              .onClick(() => {
-                // Each game can only be stared once
-                this.isStared = !this.isStared
-                if (this.isStared) {
-                  this.staredGames.push(this.gameDetail)
-                } else {
-                  // Remove game from stared list using filter
-                  this.staredGames = this.staredGames.filter((item) => item.id !== this.gameDetail.id);
-                }
-                // Test stared game list data
-                // this.staredGames.forEach((item) => {
-                //   hilog.info(23, 'stared games', `${item.title}`)
-                // })
-              })
+          Row() {
+            // Name
+            Row({ space: 10 }) {
+              Text(`${this.gameDetail.title}`)
+                .fontSize(28)
+                .fontWeight(700)
+              Image(this.isStared === true ? $r('app.media.icon_stared') : $r('app.media.icon_not_stared'))
+                .width(20)
+                .objectFit(ImageFit.Auto)
+            }
+            .onClick(() => {
+              // Each game can only be stared once
+              this.isStared = !this.isStared
+              if (this.isStared) {
+                this.staredGames.push(this.gameDetail)
+              } else {
+                // Remove game from stared list using filter
+                this.staredGames = this.staredGames.filter((item) => item.id !== this.gameDetail.id);
+              }
+              // Test stared game list data
+              // this.staredGames.forEach((item) => {
+              //   hilog.info(23, 'stared games', `${item.title}`)
+              // })
+            })
           }
           .width('100%')
           .justifyContent(FlexAlign.Start)
