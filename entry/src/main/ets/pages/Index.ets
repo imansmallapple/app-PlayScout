@@ -2,6 +2,7 @@ import { GameDataSource, MyDataSource } from '../data/DataSource'
 import { Game, GameDetails } from '../model/game'
 import router from '@ohos.router'
 import hilog from '@ohos.hilog'
+
 PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 
 @Entry
@@ -10,36 +11,65 @@ struct Index {
   @State httpCode: number = 0
   @State dataSet: MyDataSource = new MyDataSource()
   @State recent_games: Game[] = []
+  @State recent_all_games: Game[] = []
   @State gameList: Game[] = []
   // Recent released 5 games
   @State recent_games_thumbnails: string[] = []
   private swiperController: SwiperController = new SwiperController()
   private swiperMargin: number = 10
   @State isSelect: boolean = false
+  @State isLoading: boolean = false
 
   aboutToAppear(): void {
+    this.isLoading = true;
     const source = new GameDataSource()
 
     source.fetchHttpCode().then(async (code) => {
       this.httpCode = code
 
       if (code === 200) {
-          this.gameList = await source.GetGameList()
+        this.gameList = await source.GetGameList()
 
-          const recent_games = await source.GetRecentGames()
-          this.recent_games = recent_games
-          await Promise.all(recent_games); // 等待所有异步任务完成
+        const recent_games = await source.GetRecentGames()
+        this.recent_games = recent_games
+        await Promise.all(recent_games); // 等待所有异步任务完成
 
-          // 初始化数据和图片 URL, 有网且第一次未渲染时
-          this.recent_games.forEach((item, index) => {
-            this.dataSet.pushData(item);
-            this.recent_games_thumbnails[index] = item.thumbnail
-          })
+        // 初始化数据和图片 URL, 有网且第一次未渲染时
+        this.recent_games.forEach((item, index) => {
+          this.recent_games_thumbnails[index] = item.thumbnail
+        })
+
+        this.gameList.forEach((item) => {
+          this.dataSet.pushData(item);
+        })
+        this.isLoading = false;
       } else {
+        this.isLoading = false;
         console.error('Failed to fetch data: HTTP Code', code);
       }
     })
+  }
 
+  sortByReleaseDate(): void {
+    this.dataSet.clear()
+    const source = new GameDataSource()
+
+    source.fetchHttpCode().then(async (code) => {
+      this.httpCode = code
+
+      if (code === 200) {
+        this.isLoading = true;
+        this.recent_all_games = await source.GetAllRecentGames()
+        this.recent_all_games.forEach((item) => {
+          this.dataSet.pushData(item);
+          hilog.info(23, 'stared games', `${item.id}`, `${item.title}`)
+        })
+        this.isLoading = false;
+      } else {
+        this.isLoading = false;
+        console.error('Failed to fetch data: HTTP Code', code);
+      }
+    })
   }
 
   @Builder
@@ -125,13 +155,16 @@ struct Index {
         .nextMargin(this.swiperMargin)
 
         // Category Bar
-        // todo: Add Catefory bar, sort by alphabet tag and sort by release date tag
+        // todo: Add Category bar, sort by alphabet tag and sort by release date tag
         Column() {
           Row() {
             Text('Categories')
               .textStyle()
             Text('Recent Games')
               .textStyle()
+              .onClick(() => {
+                this.sortByReleaseDate()
+              })
             Text('Category')
               .textStyle()
           }
@@ -142,6 +175,23 @@ struct Index {
         }
         .width('100%')
 
+        if (this.isLoading) {
+          LoadComponent() // 显示加载组件
+        } else {
+          // Game list
+          List() {
+            LazyForEach(this.dataSet, (item: Game) => {
+              ListItem() {
+                Row({ space: 20 }) {
+                  Text(`${item.id}`)
+                  Text(`${item.title}`)
+                }
+              }
+            })
+          }
+          .width('100%')
+        }
+
         // About Author
         // todo: Add author information
       }
@@ -150,9 +200,9 @@ struct Index {
 
       Column() {
         this.floatIconBuilder($r('app.media.icon_home'))
-        this.floatIconBuilder($r('app.media.icon_badge'),()=>{
+        this.floatIconBuilder($r('app.media.icon_badge'), () => {
           router.pushUrl({
-            url:'pages/StarPage'
+            url: 'pages/StarPage'
           })
         })
         this.floatIconBuilder($r('app.media.icon_search'))
@@ -194,4 +244,18 @@ function swiperImageStyle(game: Game) {
 function textStyle() {
   .fontSize(20)
   .fontWeight(600)
+}
+
+@Component
+export struct LoadComponent {
+  build() {
+    Column() {
+      LoadingProgress()
+        .color(Color.Blue)
+        .width(50)
+        .margin({ bottom: '10%' })
+    }
+    .layoutWeight(1)
+    .justifyContent(FlexAlign.Center)
+  }
 }

@@ -89,6 +89,26 @@ class GameDataSource {
     });
   }
 
+  // Get all recent games
+  async GetAllRecentGames(): Promise<Game[]> {
+    // 返回一个 Promise 来确保异步请求的结果可以正确传递
+    return new Promise<Game[]>((resolve, reject) => {
+      let httpRequest = http.createHttp()
+      httpRequest.request(Game_By_ReleaseDate_URL, (err, data) => {
+        if (!err) {
+          try {
+            let responseData: Game[] = JSON.parse(data.result as string)
+            resolve(responseData); // 请求成功，返回数据
+          } catch (error) {
+            reject('Failed to parse response data'); // 捕获解析错误
+          }
+        } else {
+          reject('Error: ' + err); // 请求失败，返回错误
+        }
+      });
+    });
+  }
+
   // Get top 5 recent games
   async GetGamesDetail(game_id: number): Promise<GameDetails> {
     // 返回一个 Promise 来确保异步请求的结果可以正确传递
@@ -207,6 +227,10 @@ class MyDataSource extends BasicDataSource {
   public pushData(data: Game): void {
     this.dataArray.push(data);
     this.notifyDataAdd(this.dataArray.length - 1);
+  }
+
+  public clear() {
+    this.dataArray = []
   }
 }
 
