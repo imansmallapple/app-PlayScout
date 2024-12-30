@@ -1,22 +1,13 @@
 import { GameDetails } from '../model/game';
 import hilog from '@ohos.hilog';
 import router from '@ohos.router';
+import promptAction from '@ohos.promptAction';
 
 @Entry
 @Component
 struct StarPage {
-  @State staredGames: GameDetails[] = []
-
-  aboutToAppear(): void {
-    this.staredGames = AppStorage.get('staredGames') ?? []
-
-    // Test if stared list can be rendered
-    // this.staredGames.forEach((item) => {
-    //   hilog.info(23, 'stared games', `${item.title}`)
-    // })
-  }
-
-  // todo: name, short intro, image, remove button
+  // @State staredGames: GameDetails[] = []
+  @StorageLink('staredGames') staredGames: GameDetails[] = AppStorage.get('staredGames') ?? []
 
   build() {
     Column() {
@@ -49,8 +40,25 @@ struct StarPage {
                   .fontColor('#ff1e3fc6')
                   .layoutWeight(1)
                   .onClick(() => {
-                    // todo: Implement delete click event
-                    hilog.info(23, 'trigger delete', 'delete')
+
+                    AlertDialog.show({
+                      title: 'Remove game',
+                      message: `Are you sure you want to remove ${item.title} from star list?`,
+                      primaryButton: {
+                        value: 'Confirm',
+                        action: () => {
+                          this.staredGames = this.staredGames.filter((staredItem) => staredItem.id !== item.id)
+                          promptAction.showToast({
+                            message: "Game removed!"
+                          })
+                        }
+                      },
+                      secondaryButton: {
+                        value: 'Cancel',
+                        action: () => {}
+                      },
+                      alignment: DialogAlignment.Center
+                    })
                   })
               }
               .justifyContent(FlexAlign.Start)
