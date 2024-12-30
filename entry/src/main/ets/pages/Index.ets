@@ -9,7 +9,7 @@ PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 @Component
 struct Index {
   @State httpCode: number = 0
-  @State dataSet: MyDataSource = new MyDataSource()
+  // @State dataSet: MyDataSource = new MyDataSource()
   @State recent_games: Game[] = []
   @State recent_all_games: Game[] = []
   @State gameList: Game[] = []
@@ -17,7 +17,7 @@ struct Index {
   @State recent_games_thumbnails: string[] = []
   private swiperController: SwiperController = new SwiperController()
   private swiperMargin: number = 10
-  @State isSelect: boolean = false
+  @State isSortByRecentSelect: boolean = false
   @State isLoading: boolean = false
 
   aboutToAppear(): void {
@@ -39,9 +39,10 @@ struct Index {
           this.recent_games_thumbnails[index] = item.thumbnail
         })
 
-        this.gameList.forEach((item) => {
-          this.dataSet.pushData(item);
-        })
+        // Block dataSet to avoid easily crash
+        // this.gameList.forEach((item) => {
+        //   this.dataSet.pushData(item);
+        // })
         this.isLoading = false;
       } else {
         this.isLoading = false;
@@ -51,7 +52,7 @@ struct Index {
   }
 
   sortByReleaseDate(): void {
-    this.dataSet.clear()
+    // this.dataSet.clear()
     const source = new GameDataSource()
 
     source.fetchHttpCode().then(async (code) => {
@@ -60,10 +61,11 @@ struct Index {
       if (code === 200) {
         this.isLoading = true;
         this.recent_all_games = await source.GetAllRecentGames()
-        this.recent_all_games.forEach((item) => {
-          this.dataSet.pushData(item);
-          hilog.info(23, 'stared games', `${item.id}`, `${item.title}`)
-        })
+        this.gameList = this.recent_all_games
+        // this.recent_all_games.forEach((item) => {
+        //   this.dataSet.pushData(item);
+        //   hilog.info(23, 'stared games', `${item.id}`, `${item.title}`)
+        // })
         this.isLoading = false;
       } else {
         this.isLoading = false;
@@ -92,6 +94,14 @@ struct Index {
     })
     .backdropBlur(20)
     .onClick(callback)
+  }
+
+  @Builder
+  dividerBuilder(width: number) {
+    Divider()
+      .strokeWidth(2)
+      .width(width)
+      .color('#ff1e3fc6')
   }
 
   build() {
@@ -155,16 +165,23 @@ struct Index {
         .nextMargin(this.swiperMargin)
 
         // Category Bar
-        // todo: Add Category bar, sort by alphabet tag and sort by release date tag
         Column() {
           Row() {
             Text('Categories')
               .textStyle()
-            Text('Recent Games')
-              .textStyle()
-              .onClick(() => {
-                this.sortByReleaseDate()
-              })
+            Column() {
+              Text('Recent Games')
+                .textStyle()
+                .onClick(() => {
+                  this.isSortByRecentSelect = true
+                  this.sortByReleaseDate()
+                })
+                .fontColor(this.isSortByRecentSelect ? '#ff1e3fc6' : '#ff000000')
+              if (this.isSortByRecentSelect) {
+                this.dividerBuilder(130)
+              }
+            }
+
             Text('Category')
               .textStyle()
           }
@@ -180,13 +197,59 @@ struct Index {
         } else {
           // Game list
           List() {
-            LazyForEach(this.dataSet, (item: Game) => {
+            // For unknown reason, use LazyForEach with dataSet always easily crash, use ForEach instead
+            ForEach(this.gameList, (item: Game) => {
               ListItem() {
                 Row({ space: 20 }) {
-                  Text(`${item.id}`)
-                  Text(`${item.title}`)
+                  // Add if statement to avoid program crash
+                  if (item.thumbnail) {
+                    Image(`${item.thumbnail}`)
+                      .height('100%')
+                      .onClick(() => {
+                        router.pushUrl({
+                          url: 'pages/GameDetail',
+                          params: {
+                            game_id: item.id
+                          }
+                        })
+                      })
+                  }
+                  Column({ space: 3 }) {
+                    Text(`${item.title}`)
+                      .fontWeight(700)
+                      .fontSize(20)
+                    Row() {
+                      Column() {
+                        Text(`${item.genre}`)
+                          .fontColor('#ffffffff')
+                      }
+                      .padding(5)
+                      .borderWidth(1)
+                      .backgroundColor('#3b000000')
+
+                      Column() {
+                        Text(`${item.release_date}`)
+                          .fontColor('#56000000')
+                      }
+                      .layoutWeight(1)
+                      .alignItems(HorizontalAlign.End)
+                    }
+                    .layoutWeight(1)
+                    .height('100%')
+                    .justifyContent(FlexAlign.End)
+                    .alignItems(VerticalAlign.Bottom)
+                  }
+                  .layoutWeight(1)
+                  .height('100%')
+                  .justifyContent(FlexAlign.Start)
+                  .alignItems(HorizontalAlign.Start)
                 }
+                .width('100%')
+                .height(100)
               }
+              .margin(5)
+              .padding(5)
+              .borderWidth(1)
             })
           }
           .width('100%')
