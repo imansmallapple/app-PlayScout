@@ -37,7 +37,8 @@ struct GameDetail {
         this.gameDetail = await source.GetGamesDetail(this.game_id);
         this.screenshots = this.gameDetail.screenshots;
         this.min_system_requirements = this.gameDetail.minimum_system_requirements;
-
+        // 开启自动切换定时器
+        this.startAutoSwitch();
         // 检查是否已收藏
         this.isStared = this.staredGames.some((item) => item.id === this.gameDetail.id);
       } else {
