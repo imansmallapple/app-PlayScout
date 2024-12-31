@@ -335,6 +335,14 @@ struct Index {
                         Text(`${item.title}`)
                           .fontWeight(700)
                           .fontSize(20)
+                          .onClick(() => {
+                            router.pushUrl({
+                              url: 'pages/GameDetail',
+                              params: {
+                                game_id: item.id
+                              }
+                            })
+                          })
                         Row() {
                           Column() {
                             Text(`${item.genre}`)
@@ -343,15 +351,31 @@ struct Index {
                           .padding(5)
                           .borderWidth(1)
                           .backgroundColor('#3b000000')
+                          .onClick(() => {
+                            router.pushUrl({
+                              url: 'pages/SortByTagPage',
+                              params: {
+                                tag: item.genre
+                              }
+                            })
+                          })
 
                           Column({ space: 5 }) {
-                            Image(item.platform === "PC (Windows)" || "Windows" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
+                            Image(item.platform === "PC (Windows)" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
                               .width(20)
                             Text(`${item.release_date}`)
                               .fontColor('#56000000')
                           }
                           .layoutWeight(1)
                           .alignItems(HorizontalAlign.End)
+                          .onClick(() => {
+                            router.pushUrl({
+                              url: 'pages/SortByPlatformPage',
+                              params: {
+                                platform: item.platform
+                              }
+                            })
+                          })
                         }
                         .layoutWeight(1)
                         .height('100%')

@@ -196,13 +196,20 @@ struct GameDetail {
                   }
 
                   Column() {
-                    // todo: Add sort by platform route
                     Row({ space: 10 }) {
                       Text(`${this.gameDetail.platform}`)
                         .fontColor('#ff1e3fc6')
-                      Image(this.gameDetail.platform === "PC (Windows)" || "Windows" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
+                      Image(this.gameDetail.platform === "PC (Windows)" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
                         .width(20)
                     }
+                    .onClick(() => {
+                      router.pushUrl({
+                        url: 'pages/SortByPlatformPage',
+                        params: {
+                          platform: this.gameDetail.platform
+                        }
+                      })
+                    })
                   }
                 }
                 .width('100%')
@@ -221,10 +228,17 @@ struct GameDetail {
                   }
 
                   Column() {
-                    // todo: Add sort by genre page
                     Text(`${this.gameDetail.genre}`)
                       .fontColor('#ff1e3fc6')
                   }
+                  .onClick(() => {
+                    router.pushUrl({
+                      url: 'pages/SortByTagPage',
+                      params: {
+                        tag: this.gameDetail.genre
+                      }
+                    })
+                  })
                 }
                 .width('100%')
                 .justifyContent(FlexAlign.Start)

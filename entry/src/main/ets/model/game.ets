@@ -7,7 +7,7 @@ class Game {
   thumbnail: string = ''
   short_description: string = ''
   game_url: string = ''
-  genre: Tag = Tag.mmorpg
+  genre: string = ''
   platform: string = ''
   publisher: string = ''
   developer: string = ''
@@ -35,7 +35,7 @@ class GameDetails {
   short_description: string = ''
   description: string = ''
   game_url: string = ''
-  genre: Tag = Tag.mmorpg
+  genre: string = ''
   platform: string = ''
   publisher: string = ''
   developer: string = ''

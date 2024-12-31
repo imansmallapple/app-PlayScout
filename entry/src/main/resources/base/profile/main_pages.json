@@ -4,6 +4,8 @@
     "pages/Splash",
     "pages/GameDetail",
     "pages/Browser",
-    "pages/StarPage"
+    "pages/StarPage",
+    "pages/SortByTagPage",
+    "pages/SortByPlatformPage"
   ]
 }
