@@ -1,9 +1,14 @@
 import router from '@ohos.router';
+import { registerAllFonts } from '../font/registerFonts';
 
 @Entry
 @Component
 struct Splash {
   @State flag: boolean = false;
+
+  aboutToAppear(): void {
+    registerAllFonts()
+  }
 
   onPageShow(): void {
     animateTo({
@@ -43,7 +48,8 @@ struct Splash {
 
 @Extend(Text)
 function titleTextStyle(fontColor: string | ResourceColor) {
-  .fontSize(45)
-  .fontWeight(FontWeight.Medium)
+  .fontSize(65)
+  .fontWeight(FontWeight.Bolder)
   .fontColor(fontColor)
+  .fontFamily('Teko')
 }

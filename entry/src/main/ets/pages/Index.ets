@@ -1,10 +1,11 @@
-import { GameDataSource, MyDataSource } from '../data/DataSource'
+import { GameDataSource } from '../data/DataSource'
 import { Game, GameDetails } from '../model/game'
 import router from '@ohos.router'
 import { tagList, platformList } from '../data/list'
-import Platform from '../enum/platform'
 import { HttpErrorComponent, LoadComponent } from '../Component/components'
 import hilog from '@ohos.hilog'
+import font from '@ohos.font'
+import { registerAllFonts } from '../font/registerFonts'
 
 PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 
@@ -12,7 +13,6 @@ PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 @Component
 struct Index {
   @State httpCode: number = 0
-  // @State dataSet: MyDataSource = new MyDataSource()
   @State recent_games: Game[] = []
   @State recent_all_games: Game[] = []
   @State gameList: Game[] = []
@@ -36,6 +36,7 @@ struct Index {
   @State isHttpError: boolean = false
 
   aboutToAppear(): void {
+    registerAllFonts()
     this.isGlobalLoading = true;
     const source = new GameDataSource()
 
@@ -47,17 +48,12 @@ struct Index {
 
         const recent_games = await source.GetRecentGames()
         this.recent_games = recent_games
-        await Promise.all(recent_games); // 等待所有异步任务完成
+        await Promise.all(recent_games)
 
-        // 初始化数据和图片 URL, 有网且第一次未渲染时
         this.recent_games.forEach((item, index) => {
           this.recent_games_thumbnails[index] = item.thumbnail
         })
 
-        // Block dataSet to avoid easily crash
-        // this.gameList.forEach((item) => {
-        //   this.dataSet.pushData(item);
-        // })
         this.isGlobalLoading = false;
       } else {
         this.isHttpError = true;
@@ -112,10 +108,6 @@ struct Index {
         this.isListLoading = true;
         this.recent_all_games = await source.GetAllRecentGames()
         this.gameList = this.recent_all_games
-        // this.recent_all_games.forEach((item) => {
-        //   this.dataSet.pushData(item);
-        //   hilog.info(23, 'stared games', `${item.id}`, `${item.title}`)
-        // })
         this.isListLoading = false;
       } else {
         this.isListLoading = false;
@@ -194,6 +186,7 @@ struct Index {
 
                 Text('COUT')
                   .titleTextStyle('#ff000000')
+
               }
             }
             .justifyContent(FlexAlign.Center)
@@ -443,9 +436,10 @@ struct Index {
 
 @Extend(Text)
 function titleTextStyle(fontColor: string | ResourceColor) {
-  .fontSize(28)
-  .fontWeight(FontWeight.Bold)
+  .fontSize(40)
+  .fontWeight(FontWeight.Bolder)
   .fontColor(fontColor)
+  .fontFamily('ExtraBold')
 }
 
 @Extend(Image)
@@ -469,4 +463,5 @@ function swiperImageStyle(game: Game) {
 function textStyle() {
   .fontSize(20)
   .fontWeight(600)
+  .fontFamily('Poppins')
 }
