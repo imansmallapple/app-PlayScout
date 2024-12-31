@@ -3,6 +3,7 @@ import hilog from '@ohos.hilog';
 import systemparameter from '@ohos.systemParameterEnhance';
 import router from '@ohos.router'
 import { BusinessError } from '@ohos.base';
+import { HttpErrorComponent, LoadComponent } from '../Component/components';
 
 interface RouterParameters {
   url: string
@@ -108,40 +109,3 @@ struct Browser {
   }
 }
 
-@Component
-export struct LoadComponent {
-  build() {
-    Column() {
-      LoadingProgress()
-        .color(Color.Blue)
-        .width(50)
-        .margin({ bottom: '10%' })
-    }
-    .height('100%')
-    .justifyContent(FlexAlign.Center)
-  }
-}
-
-@Component
-export struct HttpErrorComponent {
-  @Prop text: string = ''
-
-  build() {
-    Column() {
-      Column() {
-
-        Image($r('app.media.icon_star'))
-          .width('20%')
-          .opacity(0.4)
-        Text(this.text)
-          .opacity(0.4)
-          .margin(5)
-      }
-      .margin({
-        bottom: '10%'
-      })
-    }
-    .height('100%')
-    .justifyContent(FlexAlign.Center)
-  }
-}

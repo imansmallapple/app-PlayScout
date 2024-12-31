@@ -2,6 +2,7 @@ import router from '@ohos.router';
 import { GameDataSource } from '../data/DataSource';
 import { Game, GameDetails, Min_System_Requirements, ScreenShot } from '../model/game';
 import hilog from '@ohos.hilog';
+import { HttpErrorComponent, LoadComponent } from '../Component/components';
 
 interface RouterParams {
   game_id: number
@@ -24,8 +25,11 @@ struct GameDetail {
   @State isExpand: boolean = false
   @StorageLink('staredGames') staredGames: GameDetails[] = []
   @State isStared: boolean = false
+  @State isLoading: boolean = false
+  @State isHttpError: boolean = false
 
   aboutToAppear(): void {
+    this.isLoading = true;
     const params: RouterParams = router.getParams() as RouterParams;
     this.game_id = params.game_id;
 
@@ -41,7 +45,10 @@ struct GameDetail {
         this.startAutoSwitch();
         // 检查是否已收藏
         this.isStared = this.staredGames.some((item) => item.id === this.gameDetail.id);
+        this.isLoading = false;
       } else {
+        this.isHttpError = true;
+        this.isLoading = false;
         console.error('Failed to fetch data: HTTP Code', code);
       }
     });
@@ -65,318 +72,328 @@ struct GameDetail {
 
   build() {
     Scroll() {
-      Column() {
-
-        // Heading image
-        Row() {
-          Image(`${this.gameDetail.thumbnail}`)
-            .objectFit(ImageFit.Contain)
-        }
-        .onClick(() => {
-          router.pushUrl({ url: 'pages/Browser'
-          , params: {
-              url: this.gameDetail.game_url
-            }
-          })
+      if (this.isHttpError) {
+        HttpErrorComponent({
+          text: 'Seems you don\'t have Internet'
         })
-
-        // Game basic information
-        Column() {
-          Row() {
-            // Name
-            Row({ space: 10 }) {
-              Text(`${this.gameDetail.title}`)
-                .fontSize(28)
-                .fontWeight(700)
-              Image(this.isStared === true ? $r('app.media.icon_stared') : $r('app.media.icon_not_stared'))
-                .width(20)
-                .objectFit(ImageFit.Auto)
-            }
-            .onClick(() => {
-              // Each game can only be stared once
-              this.isStared = !this.isStared
-              if (this.isStared) {
-                this.staredGames.push(this.gameDetail)
-              } else {
-                // Remove game from stared list using filter
-                this.staredGames = this.staredGames.filter((item) => item.id !== this.gameDetail.id);
-              }
-              // Test stared game list data
-              // this.staredGames.forEach((item) => {
-              //   hilog.info(23, 'stared games', `${item.title}`)
-              // })
-            })
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.Start)
-          .margin({ left: 10, top: 5, bottom: 5 })
-
-          // Developer, Publisher & Release Date
+      } else {
+        if (this.isLoading) {
+          LoadComponent()
+        } else {
           Column() {
-            Row({ space: 10 }) {
-              Column() {
-                Row() {
-                  Text('Developer')
-                    .fontColor('#61000000')
-                }
-                .width(100)
-                .margin({ left: 10 })
-              }
 
-              Column() {
-                Text(`${this.gameDetail.title}`)
-              }
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.Start)
-            .margin(5)
-
-            // Publisher
-            Row({ space: 10 }) {
-              Column() {
-                Row() {
-                  Text('Publisher')
-                    .fontColor('#61000000')
-                }
-                .width(100)
-                .margin({ left: 10 })
-              }
-
-              Column() {
-                Text(`${this.gameDetail.publisher}`)
-              }
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.Start)
-            .margin(5)
-
-            // Release date
-            Row({ space: 10 }) {
-              Column() {
-                Row() {
-                  Text('Release Date')
-                    .fontColor('#61000000')
-                }
-                .width(100)
-                .margin({ left: 10 })
-              }
-
-              Column() {
-                Text(`${this.gameDetail.release_date}`)
-              }
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.Start)
-            .margin(5)
-
-            // Platform
-            Row({ space: 10 }) {
-              Column() {
-                Row() {
-                  Text('Platform')
-                    .fontColor('#61000000')
-                }
-                .width(100)
-                .margin({ left: 10 })
-              }
-
-              Column() {
-                // todo: Add sort by platform route
-                Row({ space: 10 }) {
-                  Text(`${this.gameDetail.platform}`)
-                    .fontColor('#ff1e3fc6')
-                  Image(this.gameDetail.platform === "PC (Windows)" || "Windows" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
-                    .width(20)
-                }
-              }
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.Start)
-            .margin(5)
-
-            // Genre
-            Row({ space: 10 }) {
-              Column() {
-                Row() {
-                  Text('Genre')
-                    .fontColor('#61000000')
-                }
-                .width(100)
-                .margin({ left: 10 })
-              }
-
-              Column() {
-                // todo: Add sort by genre page
-                Text(`${this.gameDetail.genre}`)
-                  .fontColor('#ff1e3fc6')
-              }
-            }
-            .width('100%')
-            .justifyContent(FlexAlign.Start)
-            .margin(5)
-          }
-          .margin({ bottom: 10 })
-
-          // Description
-          Row() {
-            Column() {
-              if (this.isExpand) {
-                Text(this.gameDetail.description)
-                  .width('100%')
-              } else {
-                Text(this.gameDetail.description)
-                  .textOverflow({ overflow: TextOverflow.Ellipsis })
-                  .width('100%')
-                  .maxLines(10)
-              }
-              Text(this.isExpand ? 'Contract' : 'Expand')
-                .width('100%')
-                .fontColor('#ff1e3fc6')
+            // Heading image
+            Row() {
+              Image(`${this.gameDetail.thumbnail}`)
+                .objectFit(ImageFit.Contain)
             }
             .onClick(() => {
-              this.isExpand = !this.isExpand
+              router.pushUrl({ url: 'pages/Browser'
+              , params: {
+                  url: this.gameDetail.game_url
+                }
+              })
             })
-            .margin({ bottom: 20 })
-          }
-          .width('100%')
-          .margin({ left: 5 })
-          .justifyContent(FlexAlign.Start)
-        }
 
-        // Image screenshot detail
-        Row() {
-          if (this.screenshots[0] !== undefined) {
-            Image(`${this.screenshots[this.selectedIndex].image}`)
-              .margin(5)
-          }
-        }
+            // Game basic information
+            Column() {
+              Row() {
+                // Name
+                Row({ space: 10 }) {
+                  Text(`${this.gameDetail.title}`)
+                    .fontSize(28)
+                    .fontWeight(700)
+                  Image(this.isStared === true ? $r('app.media.icon_stared') : $r('app.media.icon_not_stared'))
+                    .width(20)
+                    .objectFit(ImageFit.Auto)
+                }
+                .onClick(() => {
+                  // Each game can only be stared once
+                  this.isStared = !this.isStared
+                  if (this.isStared) {
+                    this.staredGames.push(this.gameDetail)
+                  } else {
+                    // Remove game from stared list using filter
+                    this.staredGames = this.staredGames.filter((item) => item.id !== this.gameDetail.id);
+                  }
+                  // Test stared game list data
+                  // this.staredGames.forEach((item) => {
+                  //   hilog.info(23, 'stared games', `${item.title}`)
+                  // })
+                })
+              }
+              .width('100%')
+              .justifyContent(FlexAlign.Start)
+              .margin({ left: 10, top: 5, bottom: 5 })
 
-        // Small image list
-        List({ scroller: this.scroller, initialIndex: this.selectedIndex }) {
-          ForEach(this.screenshots, (item: ScreenShot, index: number) => {
-            ListItem() {
+              // Developer, Publisher & Release Date
               Column() {
-                if (this.selectedIndex == index) {
-                  Image(`${item.image}`)
-                    .objectFit(ImageFit.Contain)
-                    .borderWidth(2)
-                    .borderColor('#6dd91d1d')
-                } else {
-                  Image(`${item.image}`)
-                    .objectFit(ImageFit.Contain)
-                    .onClick(() => {
-                      this.selectedIndex = index
-                    })
+                Row({ space: 10 }) {
+                  Column() {
+                    Row() {
+                      Text('Developer')
+                        .fontColor('#61000000')
+                    }
+                    .width(100)
+                    .margin({ left: 10 })
+                  }
+
+                  Column() {
+                    Text(`${this.gameDetail.title}`)
+                  }
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start)
+                .margin(5)
+
+                // Publisher
+                Row({ space: 10 }) {
+                  Column() {
+                    Row() {
+                      Text('Publisher')
+                        .fontColor('#61000000')
+                    }
+                    .width(100)
+                    .margin({ left: 10 })
+                  }
+
+                  Column() {
+                    Text(`${this.gameDetail.publisher}`)
+                  }
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start)
+                .margin(5)
+
+                // Release date
+                Row({ space: 10 }) {
+                  Column() {
+                    Row() {
+                      Text('Release Date')
+                        .fontColor('#61000000')
+                    }
+                    .width(100)
+                    .margin({ left: 10 })
+                  }
+
+                  Column() {
+                    Text(`${this.gameDetail.release_date}`)
+                  }
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start)
+                .margin(5)
+
+                // Platform
+                Row({ space: 10 }) {
+                  Column() {
+                    Row() {
+                      Text('Platform')
+                        .fontColor('#61000000')
+                    }
+                    .width(100)
+                    .margin({ left: 10 })
+                  }
+
+                  Column() {
+                    // todo: Add sort by platform route
+                    Row({ space: 10 }) {
+                      Text(`${this.gameDetail.platform}`)
+                        .fontColor('#ff1e3fc6')
+                      Image(this.gameDetail.platform === "PC (Windows)" || "Windows" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
+                        .width(20)
+                    }
+                  }
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start)
+                .margin(5)
+
+                // Genre
+                Row({ space: 10 }) {
+                  Column() {
+                    Row() {
+                      Text('Genre')
+                        .fontColor('#61000000')
+                    }
+                    .width(100)
+                    .margin({ left: 10 })
+                  }
+
+                  Column() {
+                    // todo: Add sort by genre page
+                    Text(`${this.gameDetail.genre}`)
+                      .fontColor('#ff1e3fc6')
+                  }
+                }
+                .width('100%')
+                .justifyContent(FlexAlign.Start)
+                .margin(5)
+              }
+              .margin({ bottom: 10 })
+
+              // Description
+              Row() {
+                Column() {
+                  if (this.isExpand) {
+                    Text(this.gameDetail.description)
+                      .width('100%')
+                  } else {
+                    Text(this.gameDetail.description)
+                      .textOverflow({ overflow: TextOverflow.Ellipsis })
+                      .width('100%')
+                      .maxLines(10)
+                  }
+                  Text(this.isExpand ? 'Contract' : 'Expand')
+                    .width('100%')
+                    .fontColor('#ff1e3fc6')
+                }
+                .onClick(() => {
+                  this.isExpand = !this.isExpand
+                })
+                .margin({ bottom: 20 })
+              }
+              .width('100%')
+              .margin({ left: 5 })
+              .justifyContent(FlexAlign.Start)
+            }
+
+            // Image screenshot detail
+            Row() {
+              if (this.screenshots[0] !== undefined) {
+                Image(`${this.screenshots[this.selectedIndex].image}`)
+                  .margin(5)
+              }
+            }
+
+            // Small image list
+            List({ scroller: this.scroller, initialIndex: this.selectedIndex }) {
+              ForEach(this.screenshots, (item: ScreenShot, index: number) => {
+                ListItem() {
+                  Column() {
+                    if (this.selectedIndex == index) {
+                      Image(`${item.image}`)
+                        .objectFit(ImageFit.Contain)
+                        .borderWidth(2)
+                        .borderColor('#6dd91d1d')
+                    } else {
+                      Image(`${item.image}`)
+                        .objectFit(ImageFit.Contain)
+                        .onClick(() => {
+                          this.selectedIndex = index
+                        })
+                    }
+                  }
+                }
+                .width('31%')
+                .margin(5)
+              })
+            }
+            .listDirection(Axis.Horizontal)
+            .cachedCount(3)
+            .margin({ bottom: 20 })
+
+            // System minimum requirements
+            Column({ space: 5 }) {
+              Row() {
+                // title
+                Text('System Requirements')
+                  .fontSize(20)
+                  .fontWeight(500)
+              }
+              .width('100%')
+
+              // os
+              Row({ space: 10 }) {
+                Column() {
+                  Row() {
+                    Text('Operating System')
+                      .fontColor('#61000000')
+                  }
+                  .width(75)
+                  .margin({ left: 10 })
+                }
+
+                Column() {
+                  Text(this.min_system_requirements?.os || 'N/A')
+                    .width('75%')
                 }
               }
-            }
-            .width('31%')
-            .margin(5)
-          })
-        }
-        .listDirection(Axis.Horizontal)
-        .cachedCount(3)
-        .margin({ bottom: 20 })
+              .width('100%')
+              .justifyContent(FlexAlign.Start)
+              .alignItems(VerticalAlign.Top)
+              .margin(5)
 
-        // System minimum requirements
-        Column({ space: 5 }) {
-          Row() {
-            // title
-            Text('System Requirements')
-              .fontSize(20)
-              .fontWeight(500)
-          }
-          .width('100%')
+              // Processor
+              Row({ space: 10 }) {
+                Column() {
+                  Row() {
+                    Text('Processor')
+                      .fontColor('#61000000')
+                  }
+                  .width(75)
+                  .margin({ left: 10 })
+                }
 
-          // os
-          Row({ space: 10 }) {
-            Column() {
-              Row() {
-                Text('Operating System')
-                  .fontColor('#61000000')
+                Column() {
+                  Text(this.min_system_requirements?.processor || 'N/A')
+                    .width('75%')
+                }
               }
-              .width(75)
-              .margin({ left: 10 })
-            }
+              .width('100%')
+              .justifyContent(FlexAlign.Start)
+              .alignItems(VerticalAlign.Top)
+              .margin(5)
 
-            Column() {
-              Text(this.min_system_requirements?.os || 'N/A')
-                .width('75%')
-            }
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.Start)
-          .alignItems(VerticalAlign.Top)
-          .margin(5)
+              // Graphics
+              Row({ space: 10 }) {
+                Column() {
+                  Row() {
+                    Text('Graphics')
+                      .fontColor('#61000000')
+                  }
+                  .width(75)
+                  .margin({ left: 10 })
+                }
 
-          // Processor
-          Row({ space: 10 }) {
-            Column() {
-              Row() {
-                Text('Processor')
-                  .fontColor('#61000000')
+                Column() {
+                  Text(this.min_system_requirements?.graphics || 'N/A')
+                    .width('75%')
+                }
               }
-              .width(75)
-              .margin({ left: 10 })
-            }
+              .width('100%')
+              .justifyContent(FlexAlign.Start)
+              .alignItems(VerticalAlign.Top)
+              .margin(5)
 
-            Column() {
-              Text(this.min_system_requirements?.processor || 'N/A')
-                .width('75%')
-            }
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.Start)
-          .alignItems(VerticalAlign.Top)
-          .margin(5)
+              // Storage
+              Row({ space: 10 }) {
+                Column() {
+                  Row() {
+                    Text('Storage')
+                      .fontColor('#61000000')
+                  }
+                  .width(75)
+                  .margin({ left: 10 })
+                }
 
-          // Graphics
-          Row({ space: 10 }) {
-            Column() {
-              Row() {
-                Text('Graphics')
-                  .fontColor('#61000000')
+                Column() {
+                  Text(this.min_system_requirements?.storage || 'N/A')
+                    .width('75%')
+                }
               }
-              .width(75)
-              .margin({ left: 10 })
-            }
+              .width('100%')
+              .justifyContent(FlexAlign.Start)
+              .alignItems(VerticalAlign.Top)
+              .margin(5)
 
-            Column() {
-              Text(this.min_system_requirements?.graphics || 'N/A')
-                .width('75%')
             }
           }
-          .width('100%')
-          .justifyContent(FlexAlign.Start)
-          .alignItems(VerticalAlign.Top)
-          .margin(5)
-
-          // Storage
-          Row({ space: 10 }) {
-            Column() {
-              Row() {
-                Text('Storage')
-                  .fontColor('#61000000')
-              }
-              .width(75)
-              .margin({ left: 10 })
-            }
-
-            Column() {
-              Text(this.min_system_requirements?.storage || 'N/A')
-                .width('75%')
-            }
-          }
-          .width('100%')
-          .justifyContent(FlexAlign.Start)
-          .alignItems(VerticalAlign.Top)
-          .margin(5)
-
         }
       }
     }
     .width('100%')
     .height('100%')
-    .align(Alignment.Top)
+    .align(this.isLoading ? Alignment.Center : Alignment.Top)
   }
 }
