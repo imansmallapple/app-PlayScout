@@ -1,7 +1,7 @@
 import { GameDataSource, MyDataSource } from '../data/DataSource'
 import { Game, GameDetails } from '../model/game'
 import router from '@ohos.router'
-import hilog from '@ohos.hilog'
+import { tagList } from '../data/list'
 
 PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 
@@ -18,8 +18,13 @@ struct Index {
   private swiperController: SwiperController = new SwiperController()
   private swiperMargin: number = 10
   @State isSortByRecentSelect: boolean = false
+  @State isSortByCategory: boolean = false
   @State isLoading: boolean = false
   private scroller: Scroller = new Scroller()
+  private tagList: string[] = tagList
+  @State select: number = 0
+  @State word: string = ''
+  @State tagGameList: Game[] = []
 
   aboutToAppear(): void {
     this.isLoading = true;
@@ -44,6 +49,23 @@ struct Index {
         // this.gameList.forEach((item) => {
         //   this.dataSet.pushData(item);
         // })
+        this.isLoading = false;
+      } else {
+        this.isLoading = false;
+        console.error('Failed to fetch data: HTTP Code', code);
+      }
+    })
+  }
+
+  sortByTag(tag: string): void {
+    const source = new GameDataSource()
+
+    source.fetchHttpCode().then(async (code) => {
+      this.httpCode = code
+      if (code === 200) {
+        this.isLoading = true;
+        const tag_games = await source.SortGamesByTag(tag)
+        this.tagGameList = tag_games
         this.isLoading = false;
       } else {
         this.isLoading = false;
@@ -168,12 +190,37 @@ struct Index {
         // Category Bar
         Column() {
           Row() {
-            Text('Categories')
-              .textStyle()
+            Column() {
+              Text(this.word == '' ? 'Categories' : this.word)
+                .fontColor(this.isSortByCategory ? '#ff1e3fc6' : '#ff000000')
+                .textStyle()
+                .onClick(() => {
+                  TextPickerDialog.show({
+                    range: this.tagList,
+                    selected: this.select,
+                    onAccept: (item: TextPickerResult) => {
+                      this.select = item.index as number
+                      this.word = item.value as string
+                      this.isSortByRecentSelect = false
+                      this.isSortByCategory = true
+
+                      this.sortByTag(this.word)
+                    },
+                    onCancel: () => {
+                    },
+                    alignment: DialogAlignment.Center
+                  })
+                })
+              if (this.isSortByCategory) {
+                this.dividerBuilder(100)
+              }
+            }
+
             Column() {
               Text('Recent Games')
                 .textStyle()
                 .onClick(() => {
+                  this.isSortByCategory = false
                   this.isSortByRecentSelect = true
                   this.sortByReleaseDate()
                 })
@@ -199,7 +246,7 @@ struct Index {
           // Game list
           List({ scroller: this.scroller }) {
             // For unknown reason, use LazyForEach with dataSet always easily crash, use ForEach instead
-            ForEach(this.gameList, (item: Game) => {
+            ForEach(this.isSortByCategory ? this.tagGameList : this.gameList, (item: Game) => {
               ListItem() {
                 Row({ space: 20 }) {
                   // Add if statement to avoid program crash

@@ -20,7 +20,7 @@ struct StarPage {
             .width(100)
             .height(100)
             .opacity(0.4)
-          Text('No games')
+          Text('No game')
             .fontSize(20)
             .opacity(0.4)
         }
