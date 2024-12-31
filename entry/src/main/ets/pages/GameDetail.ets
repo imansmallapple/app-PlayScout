@@ -27,6 +27,10 @@ struct GameDetail {
   @State isStared: boolean = false
   @State isLoading: boolean = false
   @State isHttpError: boolean = false
+  private videoController: VideoController = new VideoController()
+  @State isPause: boolean = false
+  @State isFullScreen: boolean = false
+  @State isClickedVideo: boolean = false
 
   aboutToAppear(): void {
     this.isLoading = true;
@@ -59,14 +63,24 @@ struct GameDetail {
     if (this.screenshots.length > 0) {
       this.intervalId = setInterval(() => {
         this.selectedIndex = (this.selectedIndex + 1) % this.screenshots.length;
-      }, 5000); // 每隔 500 毫秒切换
+      }, 5000);
     }
   }
 
-  // 清理定时器
   onDestroy(): void {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
+    }
+  }
+
+  private toggleFullscreen() {
+    this.isFullScreen = !this.isFullScreen;
+    if (this.isFullScreen) {
+      // 开启全屏模式
+      this.videoController.requestFullscreen(true)
+    } else {
+      // 退出全屏模式
+      this.videoController.requestFullscreen(false)
     }
   }
 
@@ -84,16 +98,30 @@ struct GameDetail {
 
             // Heading image
             Row() {
-              Image(`${this.gameDetail.thumbnail}`)
-                .objectFit(ImageFit.Contain)
-            }
-            .onClick(() => {
-              router.pushUrl({ url: 'pages/Browser'
-              , params: {
-                  url: this.gameDetail.game_url
-                }
+              // Game video
+              Video({
+                src: 'https://www.freetogame.com/g/' + this.game_id + '/videoplayback.webm',
+                previewUri: this.gameDetail.thumbnail,
+                controller: this.videoController,
               })
-            })
+                .aspectRatio(1.81)
+                .autoPlay(true)
+                .muted(false)
+                .controls(this.isClickedVideo ? true : false)
+                .onClick(() => {
+                  this.isClickedVideo = true
+                  this.isPause = !this.isPause
+                  this.isPause ? this.videoController.pause() : this.videoController.start()
+                })
+                .onFullscreenChange(() => {
+                  this.toggleFullscreen()
+                })
+                .objectFit(ImageFit.Contain)
+
+              //Game thumbnail
+              // Image(`${this.gameDetail.thumbnail}`)
+              //   .objectFit(ImageFit.Contain)
+            }
 
             // Game basic information
             Column() {
@@ -125,6 +153,24 @@ struct GameDetail {
               .width('100%')
               .justifyContent(FlexAlign.Start)
               .margin({ left: 10, top: 5, bottom: 5 })
+
+              Row({ space: 5 }) {
+                Image($r('app.media.icon_click'))
+                  .width(30)
+                  .margin({ left: 10, top: 10 })
+                Button('Visit site')
+                  .type(ButtonType.Normal)
+                  .borderRadius(10)
+                  .width('80%')
+                  .backgroundColor('#ff000000')
+                  .onClick(() => {
+                    router.pushUrl({ url: 'pages/Browser'
+                    , params: {
+                        url: this.gameDetail.game_url
+                      }
+                    })
+                  })
+              }.width('100%')
 
               // Developer, Publisher & Release Date
               Column() {
