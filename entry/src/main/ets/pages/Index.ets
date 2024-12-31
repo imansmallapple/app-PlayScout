@@ -4,6 +4,7 @@ import router from '@ohos.router'
 import { tagList, platformList } from '../data/list'
 import Platform from '../enum/platform'
 import { HttpErrorComponent, LoadComponent } from '../Component/components'
+import hilog from '@ohos.hilog'
 
 PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 
@@ -121,6 +122,19 @@ struct Index {
         console.error('Failed to fetch data: HTTP Code', code);
       }
     })
+  }
+
+  tagConverter(tag: string): string {
+    if (tag == 'Action RPG' || tag == 'ARPG') {
+      return 'action-rpg'
+    } else if (tag == 'MMOARPG') {
+      return 'MMORPG'
+    } else if (tag == 'Card Game') {
+      return 'card'
+    } else if (tag == 'Battle Royale') {
+      return 'battle-royale'
+    }
+    return tag
   }
 
   @Builder
@@ -355,9 +369,10 @@ struct Index {
                             router.pushUrl({
                               url: 'pages/SortByTagPage',
                               params: {
-                                tag: item.genre
+                                tag: this.tagConverter(item.genre)
                               }
                             })
+                            hilog.info(23, 'tagInfo', `${this.tagConverter(item.genre)}`)
                           })
 
                           Column({ space: 5 }) {

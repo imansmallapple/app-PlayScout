@@ -38,6 +38,19 @@ struct SortByPlatformPage {
     });
   }
 
+  tagConverter(tag: string): string {
+    if (tag == 'Action RPG' || tag == 'ARPG') {
+      return 'action-rpg'
+    } else if (tag == 'MMOARPG') {
+      return 'MMORPG'
+    } else if (tag == 'Card Game') {
+      return 'card'
+    } else if (tag == 'Battle Royale') {
+      return 'battle-royale'
+    }
+    return tag
+  }
+
   build() {
     Column() {
       if (this.isHttpError) {
@@ -99,7 +112,7 @@ struct SortByPlatformPage {
                       router.pushUrl({
                         url: 'pages/SortByTagPage',
                         params: {
-                          tag: item.genre
+                          tag: this.tagConverter(item.genre)
                         }
                       })
                     })
