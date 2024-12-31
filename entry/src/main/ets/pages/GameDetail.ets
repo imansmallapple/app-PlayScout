@@ -181,9 +181,13 @@ struct GameDetail {
               }
 
               Column() {
-                // todo: Add sort by platform page
-                Text(`${this.gameDetail.platform}`)
-                  .fontColor('#ff1e3fc6')
+                // todo: Add sort by platform route
+                Row({ space: 10 }) {
+                  Text(`${this.gameDetail.platform}`)
+                    .fontColor('#ff1e3fc6')
+                  Image(this.gameDetail.platform === "PC (Windows)" || "Windows" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
+                    .width(20)
+                }
               }
             }
             .width('100%')

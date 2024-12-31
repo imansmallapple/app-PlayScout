@@ -1,7 +1,6 @@
 import { Game, GameDetails, Min_System_Requirements, ScreenShot } from '../model/game'
 import http from '@ohos.net.http'
 
-const platform_name: string = 'pc'
 const sortBy: string = 'alphabetical'
 const game_id: number = 452
 const BASE_URL: string = "https://www.freetogame.com/api"
@@ -25,7 +24,7 @@ const GameList_URL: string = BASE_URL + '/games'
 //     },
 // ]
 //Games by platform
-const Game_By_Platform_URL: string = BASE_URL + `/games?platform=${platform_name}`
+const Game_By_Platform_URL: string = BASE_URL + `/games?platform=`
 
 // Games by release date
 const Game_By_ReleaseDate_URL: string = BASE_URL + `/games?sort-by=release-date`
@@ -94,6 +93,26 @@ class GameDataSource {
     return new Promise<Game[]>((resolve, reject) => {
       let httpRequest = http.createHttp()
       httpRequest.request(Game_By_ReleaseDate_URL, (err, data) => {
+        if (!err) {
+          try {
+            let responseData: Game[] = JSON.parse(data.result as string)
+            resolve(responseData); // 请求成功，返回数据
+          } catch (error) {
+            reject('Failed to parse response data'); // 捕获解析错误
+          }
+        } else {
+          reject('Error: ' + err); // 请求失败，返回错误
+        }
+      });
+    });
+  }
+
+  // sort all games by category or tag
+  async SortGamesByPlatform(platform: string): Promise<Game[]> {
+    // 返回一个 Promise 来确保异步请求的结果可以正确传递
+    return new Promise<Game[]>((resolve, reject) => {
+      let httpRequest = http.createHttp()
+      httpRequest.request(Game_By_Platform_URL + `${platform}`, (err, data) => {
         if (!err) {
           try {
             let responseData: Game[] = JSON.parse(data.result as string)

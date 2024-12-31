@@ -8,7 +8,7 @@ class Game {
   short_description: string = ''
   game_url: string = ''
   genre: Tag = Tag.mmorpg
-  platform: Platform = Platform.pc
+  platform: string = ''
   publisher: string = ''
   developer: string = ''
   release_date: string = ''
@@ -36,7 +36,7 @@ class GameDetails {
   description: string = ''
   game_url: string = ''
   genre: Tag = Tag.mmorpg
-  platform: Platform = Platform.pc
+  platform: string = ''
   publisher: string = ''
   developer: string = ''
   release_date: string = ''

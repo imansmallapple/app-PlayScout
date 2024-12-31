@@ -1,7 +1,8 @@
 import { GameDataSource, MyDataSource } from '../data/DataSource'
 import { Game, GameDetails } from '../model/game'
 import router from '@ohos.router'
-import { tagList } from '../data/list'
+import { tagList, platformList } from '../data/list'
+import Platform from '../enum/platform'
 
 PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 
@@ -19,12 +20,16 @@ struct Index {
   private swiperMargin: number = 10
   @State isSortByRecentSelect: boolean = false
   @State isSortByCategory: boolean = false
+  @State isSortByPlatform: boolean = false
   @State isLoading: boolean = false
   private scroller: Scroller = new Scroller()
   private tagList: string[] = tagList
+  private platformList: string[] = platformList
   @State select: number = 0
-  @State word: string = ''
+  @State currentTag: string = ''
+  @State currentPlatform: string = ''
   @State tagGameList: Game[] = []
+  @State platformGameList: Game[] = []
 
   aboutToAppear(): void {
     this.isLoading = true;
@@ -66,6 +71,23 @@ struct Index {
         this.isLoading = true;
         const tag_games = await source.SortGamesByTag(tag)
         this.tagGameList = tag_games
+        this.isLoading = false;
+      } else {
+        this.isLoading = false;
+        console.error('Failed to fetch data: HTTP Code', code);
+      }
+    })
+  }
+
+  sortByPlatform(platform: string): void {
+    const source = new GameDataSource()
+
+    source.fetchHttpCode().then(async (code) => {
+      this.httpCode = code
+      if (code === 200) {
+        this.isLoading = true;
+        const platform_games = await source.SortGamesByPlatform(platform)
+        this.platformGameList = platform_games
         this.isLoading = false;
       } else {
         this.isLoading = false;
@@ -191,7 +213,7 @@ struct Index {
         Column() {
           Row() {
             Column() {
-              Text(this.word == '' ? 'Categories' : this.word)
+              Text(this.currentTag == '' ? 'Categories' : this.currentTag)
                 .fontColor(this.isSortByCategory ? '#ff1e3fc6' : '#ff000000')
                 .textStyle()
                 .onClick(() => {
@@ -200,11 +222,12 @@ struct Index {
                     selected: this.select,
                     onAccept: (item: TextPickerResult) => {
                       this.select = item.index as number
-                      this.word = item.value as string
+                      this.currentTag = item.value as string
                       this.isSortByRecentSelect = false
+                      this.isSortByPlatform = false
                       this.isSortByCategory = true
 
-                      this.sortByTag(this.word)
+                      this.sortByTag(this.currentTag)
                     },
                     onCancel: () => {
                     },
@@ -221,6 +244,7 @@ struct Index {
                 .textStyle()
                 .onClick(() => {
                   this.isSortByCategory = false
+                  this.isSortByPlatform = false
                   this.isSortByRecentSelect = true
                   this.sortByReleaseDate()
                 })
@@ -230,8 +254,31 @@ struct Index {
               }
             }
 
-            Text('Category')
-              .textStyle()
+            Column() {
+              Text(this.currentPlatform == '' ? 'Platform' : this.currentPlatform)
+                .textStyle()
+                .onClick(() => {
+                  TextPickerDialog.show({
+                    range: this.platformList,
+                    selected: this.select,
+                    onAccept: (item: TextPickerResult) => {
+                      this.select = item.index as number
+                      this.currentPlatform = item.value as string
+                      this.isSortByCategory = false
+                      this.isSortByRecentSelect = false
+                      this.isSortByPlatform = true
+                      this.sortByPlatform(this.currentPlatform)
+                    },
+                    onCancel: () => {
+                    },
+                    alignment: DialogAlignment.Center
+                  })
+                })
+                .fontColor(this.isSortByPlatform ? '#ff1e3fc6' : '#ff000000')
+              if (this.isSortByPlatform) {
+                this.dividerBuilder(100)
+              }
+            }
           }
           .width('100%')
           .height(40)
@@ -246,7 +293,7 @@ struct Index {
           // Game list
           List({ scroller: this.scroller }) {
             // For unknown reason, use LazyForEach with dataSet always easily crash, use ForEach instead
-            ForEach(this.isSortByCategory ? this.tagGameList : this.gameList, (item: Game) => {
+            ForEach(this.isSortByCategory ? this.tagGameList : (this.isSortByPlatform ? this.platformGameList : this.gameList), (item: Game) => {
               ListItem() {
                 Row({ space: 20 }) {
                   // Add if statement to avoid program crash
@@ -275,7 +322,9 @@ struct Index {
                       .borderWidth(1)
                       .backgroundColor('#3b000000')
 
-                      Column() {
+                      Column({ space: 5 }) {
+                        Image(item.platform === "PC (Windows)" || "Windows" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
+                          .width(20)
                         Text(`${item.release_date}`)
                           .fontColor('#56000000')
                       }

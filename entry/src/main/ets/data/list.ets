@@ -10,4 +10,6 @@ const tagList: string[] = [
   'top-down', 'side-scroller'
 ]
 
-export { tagList }
+const platformList: string[] = ['browser', 'pc']
+
+export { tagList, platformList }
