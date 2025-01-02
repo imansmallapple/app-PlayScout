@@ -6,6 +6,7 @@ import { HttpErrorComponent, LoadComponent } from '../Component/components'
 import hilog from '@ohos.hilog'
 import font from '@ohos.font'
 import { registerAllFonts } from '../font/registerFonts'
+import promptAction from '@ohos.promptAction'
 
 PersistentStorage.persistProp<GameDetails[]>('staredGames', [])
 
@@ -127,6 +128,36 @@ struct Index {
       return 'battle-royale'
     }
     return tag
+  }
+
+  private smoothScrollToTop() {
+    const scrollDuration = 1000
+    const frameRate = 60
+    const interval = 1000 / frameRate
+    const totalFrames = scrollDuration / interval
+
+    let currentFrame = 0;
+    const startY = this.scroller.currentOffset().yOffset
+    const distance = -startY
+
+    const scrollStep = () => {
+      currentFrame++;
+      const progress = Math.min(currentFrame / totalFrames, 1)
+      const easeOutQuad = (t: number) => t * (2 - t)
+      const easedProgress = easeOutQuad(progress)
+
+      this.scroller.scrollTo({
+        xOffset: 0,
+        yOffset: startY + distance * easedProgress,
+        animation: false,
+      });
+
+      if (currentFrame < totalFrames) {
+        setTimeout(scrollStep, interval)
+      }
+    };
+
+    scrollStep()
   }
 
   @Builder
@@ -414,7 +445,8 @@ struct Index {
 
           Column() {
             this.floatIconBuilder($r('app.media.icon_top'), () => {
-              this.scroller.scrollEdge(Edge.Top)
+              // this.scroller.scrollEdge(Edge.Top)
+              this.smoothScrollToTop()
             })
             this.floatIconBuilder($r('app.media.icon_badge'), () => {
               router.pushUrl({
