@@ -6,7 +6,6 @@ import promptAction from '@ohos.promptAction';
 @Entry
 @Component
 struct StarPage {
-  // @State staredGames: GameDetails[] = []
   @StorageLink('staredGames') staredGames: GameDetails[] = AppStorage.get('staredGames') ?? []
 
   build() {
@@ -104,13 +103,17 @@ struct StarPage {
                           }
                           .width(100)
                           .margin({ left: 20 })
+                          .alignItems(VerticalAlign.Top)
                         }
                         .width(100)
 
                         Column() {
                           Text(`${item.genre}`)
+                            .width(75)
                         }
                       }
+                      .alignItems(VerticalAlign.Top)
+
 
                       Row() {
                         Column() {
@@ -122,11 +125,14 @@ struct StarPage {
                           .margin({ left: 20 })
                         }
                         .width(100)
+                        .justifyContent(FlexAlign.Start)
 
                         Column() {
                           Text(`${item.platform}`)
+                            .width(75)
                         }
                       }
+                      .alignItems(VerticalAlign.Top)
                     }
                     .width('45%')
                     .alignItems(HorizontalAlign.Start)
@@ -148,7 +154,12 @@ struct StarPage {
                   }
                   .width('100%')
 
-                  Text(`${item.short_description}`)
+                  Row() {
+                    Text(`"${item.short_description}"`)
+                  }
+                  .width('100%')
+                  .padding(10)
+                  .borderWidth(1)
                 }
                 .width('100%')
               }
@@ -156,9 +167,14 @@ struct StarPage {
               .alignItems(HorizontalAlign.Start)
             }
             .borderWidth(1)
-            .borderRadius(10)
             .width('90%')
             .margin(10)
+            .shadow({
+              radius: 10,
+              offsetX: 10,
+              offsetY: 10,
+              color: '#86000000'
+            })
 
           })
         }
