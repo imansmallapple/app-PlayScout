@@ -16,12 +16,13 @@ struct StarPage {
       if (this.staredGames.length == 0) {
         Column({ space: 8 }) {
           Image($r('app.media.icon_no_game'))
-            .width(100)
-            .height(100)
+            .width('30%')
             .opacity(0.4)
           Text('No game')
-            .fontSize(20)
+            .fontSize(30)
+            .fontWeight(500)
             .opacity(0.4)
+            .fontFamily('Teko')
         }
         .width('100%')
         .height('100%')

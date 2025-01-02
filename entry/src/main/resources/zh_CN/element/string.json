@@ -15,6 +15,10 @@
     {
       "name": "App_name",
       "value": "游乐盒"
+    },
+    {
+      "name": "search",
+      "value": "搜索"
     }
   ]
 }

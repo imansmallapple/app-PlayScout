@@ -15,6 +15,10 @@
     {
       "name": "App_name",
       "value": "Play Scout"
+    },
+    {
+      "name": "search",
+      "value": "Search"
     }
   ]
 }

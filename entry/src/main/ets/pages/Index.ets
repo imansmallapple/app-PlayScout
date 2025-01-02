@@ -35,6 +35,14 @@ struct Index {
   @State tagGameList: Game[] = []
   @State platformGameList: Game[] = []
   @State isHttpError: boolean = false
+  //For search bar
+  @State changeValue: string = ''
+  @State isFiltered: boolean = false
+  @State isShouldFocus: boolean = false
+  private searchController: SearchController = new SearchController()
+  @State isEnter: string = ''
+  @State filteredGames: Game[] = []
+  @State isSearchIconClick: boolean = false
 
   aboutToAppear(): void {
     registerAllFonts()
@@ -263,6 +271,42 @@ struct Index {
             .prevMargin(this.swiperMargin)
             .nextMargin(this.swiperMargin)
 
+            if (this.isSearchIconClick) {
+              Search({
+                value: this.changeValue,
+                placeholder: Object($r("app.string.search")),
+                controller: this.searchController
+              })
+                .focusable(true)
+                .width("100%")
+                .height(40)
+                .backgroundColor("#F5F5F5")
+                .placeholderColor(Color.Grey)
+                .placeholderFont({ size: 14, weight: 400 })
+                .textFont({ size: 14, weight: 400 })
+                .onChange((value: string) => {
+                  this.changeValue = value
+                  if (value == '') {
+                    this.isFiltered = false
+                  }
+                  this.isFiltered = true
+                  const filteredGames = this.gameList.filter((game: Game) => {
+                    return game.title.toLowerCase().includes(value.toLowerCase())
+                  })
+                  this.filteredGames = filteredGames
+                })
+                .onSubmit((value: string) => {
+                  this.isFiltered = true
+                  const filteredGames = this.gameList.filter((game: Game) => {
+                    return game.title.toLowerCase().includes(value.toLowerCase())
+                  })
+                  this.filteredGames = filteredGames
+                })
+                .onTouch(() => {
+                  this.isShouldFocus = true
+                })
+                .focusable(this.isShouldFocus);
+            }
             // Category Bar
             Column() {
               Row() {
@@ -351,90 +395,195 @@ struct Index {
               .justifyContent(FlexAlign.Center)
             } else {
               // Game list
-              List({ scroller: this.scroller }) {
-                // For unknown reason, use LazyForEach with dataSet always easily crash, use ForEach instead
-                ForEach(this.isSortByCategory ? this.tagGameList : (this.isSortByPlatform ? this.platformGameList : this.gameList), (item: Game) => {
-                  ListItem() {
-                    Row({ space: 20 }) {
-                      // Add if statement to avoid program crash
-                      if (item.thumbnail) {
-                        Image(`${item.thumbnail}`)
-                          .height('100%')
-                          .onClick(() => {
-                            router.pushUrl({
-                              url: 'pages/GameDetail',
-                              params: {
-                                game_id: item.id
-                              }
+              if (!this.isFiltered) {
+                List({ scroller: this.scroller }) {
+                  // For unknown reason, use LazyForEach with dataSet always easily crash, use ForEach instead
+                  ForEach(this.isSortByCategory ? this.tagGameList : (this.isSortByPlatform ? this.platformGameList : this.gameList), (item: Game) => {
+                    ListItem() {
+                      Row({ space: 20 }) {
+                        // Add if statement to avoid program crash
+                        if (item.thumbnail) {
+                          Image(`${item.thumbnail}`)
+                            .height('100%')
+                            .onClick(() => {
+                              router.pushUrl({
+                                url: 'pages/GameDetail',
+                                params: {
+                                  game_id: item.id
+                                }
+                              })
                             })
-                          })
-                      }
-                      Column({ space: 3 }) {
-                        Text(`${item.title}`)
-                          .fontWeight(700)
-                          .fontSize(20)
-                          .onClick(() => {
-                            router.pushUrl({
-                              url: 'pages/GameDetail',
-                              params: {
-                                game_id: item.id
-                              }
+                        }
+                        Column({ space: 3 }) {
+                          Text(`${item.title}`)
+                            .fontWeight(700)
+                            .fontSize(20)
+                            .onClick(() => {
+                              router.pushUrl({
+                                url: 'pages/GameDetail',
+                                params: {
+                                  game_id: item.id
+                                }
+                              })
                             })
-                          })
-                        Row() {
-                          Column() {
-                            Text(`${item.genre}`)
-                              .fontColor('#ffffffff')
-                          }
-                          .padding(5)
-                          .borderWidth(1)
-                          .backgroundColor('#3b000000')
-                          .onClick(() => {
-                            router.pushUrl({
-                              url: 'pages/SortByTagPage',
-                              params: {
-                                tag: this.tagConverter(item.genre)
-                              }
+                          Row() {
+                            Column() {
+                              Text(`${item.genre}`)
+                                .fontColor('#ffffffff')
+                            }
+                            .padding(5)
+                            .borderWidth(1)
+                            .backgroundColor('#3b000000')
+                            .onClick(() => {
+                              router.pushUrl({
+                                url: 'pages/SortByTagPage',
+                                params: {
+                                  tag: this.tagConverter(item.genre)
+                                }
+                              })
+                              hilog.info(23, 'tagInfo', `${this.tagConverter(item.genre)}`)
                             })
-                            hilog.info(23, 'tagInfo', `${this.tagConverter(item.genre)}`)
-                          })
 
-                          Column({ space: 5 }) {
-                            Image(item.platform === "PC (Windows)" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
-                              .width(20)
-                            Text(`${item.release_date}`)
-                              .fontColor('#56000000')
+                            Column({ space: 5 }) {
+                              Image(item.platform === "PC (Windows)" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
+                                .width(20)
+                              Text(`${item.release_date}`)
+                                .fontColor('#56000000')
+                            }
+                            .layoutWeight(1)
+                            .alignItems(HorizontalAlign.End)
+                            .onClick(() => {
+                              router.pushUrl({
+                                url: 'pages/SortByPlatformPage',
+                                params: {
+                                  platform: item.platform
+                                }
+                              })
+                            })
                           }
                           .layoutWeight(1)
-                          .alignItems(HorizontalAlign.End)
-                          .onClick(() => {
-                            router.pushUrl({
-                              url: 'pages/SortByPlatformPage',
-                              params: {
-                                platform: item.platform
-                              }
-                            })
-                          })
+                          .height('100%')
+                          .justifyContent(FlexAlign.End)
+                          .alignItems(VerticalAlign.Bottom)
                         }
                         .layoutWeight(1)
                         .height('100%')
-                        .justifyContent(FlexAlign.End)
-                        .alignItems(VerticalAlign.Bottom)
+                        .justifyContent(FlexAlign.Start)
+                        .alignItems(HorizontalAlign.Start)
                       }
-                      .layoutWeight(1)
-                      .height('100%')
-                      .justifyContent(FlexAlign.Start)
-                      .alignItems(HorizontalAlign.Start)
+                      .width('100%')
+                      .height(100)
                     }
-                    .width('100%')
-                    .height(100)
+                    .margin(5)
+                    .padding(5)
+                    .borderWidth(1)
+                  })
+                }
+                .width('100%')
+              } else {
+                if (this.filteredGames.length == 0) {
+                  Column({ space: 8 }) {
+                    Column({ space: 8 }) {
+                      Image($r('app.media.icon_no_result'))
+                        .width('30%')
+                        .opacity(0.4)
+                        .margin({
+                          top: '30%'
+                        })
+                      Text('No result')
+                        .fontSize(30)
+                        .fontWeight(500)
+                        .opacity(0.4)
+                        .fontFamily('Teko')
+                    }
                   }
-                  .margin(5)
-                  .padding(5)
-                  .borderWidth(1)
-                })
+                  .width('100%')
+                  .justifyContent(FlexAlign.Start)
+                }
+                List({ scroller: this.scroller }) {
+                  // For unknown reason, use LazyForEach with dataSet always easily crash, use ForEach instead
+                  ForEach(this.filteredGames, (item: Game) => {
+                    ListItem() {
+                      Row({ space: 20 }) {
+                        // Add if statement to avoid program crash
+                        if (item.thumbnail) {
+                          Image(`${item.thumbnail}`)
+                            .height('100%')
+                            .onClick(() => {
+                              router.pushUrl({
+                                url: 'pages/GameDetail',
+                                params: {
+                                  game_id: item.id
+                                }
+                              })
+                            })
+                        }
+                        Column({ space: 3 }) {
+                          Text(`${item.title}`)
+                            .fontWeight(700)
+                            .fontSize(20)
+                            .onClick(() => {
+                              router.pushUrl({
+                                url: 'pages/GameDetail',
+                                params: {
+                                  game_id: item.id
+                                }
+                              })
+                            })
+                          Row() {
+                            Column() {
+                              Text(`${item.genre}`)
+                                .fontColor('#ffffffff')
+                            }
+                            .padding(5)
+                            .borderWidth(1)
+                            .backgroundColor('#3b000000')
+                            .onClick(() => {
+                              router.pushUrl({
+                                url: 'pages/SortByTagPage',
+                                params: {
+                                  tag: this.tagConverter(item.genre)
+                                }
+                              })
+                              hilog.info(23, 'tagInfo', `${this.tagConverter(item.genre)}`)
+                            })
+
+                            Column({ space: 5 }) {
+                              Image(item.platform === "PC (Windows)" ? $r('app.media.icon_window') : $r('app.media.icon_browser'))
+                                .width(20)
+                              Text(`${item.release_date}`)
+                                .fontColor('#56000000')
+                            }
+                            .layoutWeight(1)
+                            .alignItems(HorizontalAlign.End)
+                            .onClick(() => {
+                              router.pushUrl({
+                                url: 'pages/SortByPlatformPage',
+                                params: {
+                                  platform: item.platform
+                                }
+                              })
+                            })
+                          }
+                          .layoutWeight(1)
+                          .height('100%')
+                          .justifyContent(FlexAlign.End)
+                          .alignItems(VerticalAlign.Bottom)
+                        }
+                        .layoutWeight(1)
+                        .height('100%')
+                        .justifyContent(FlexAlign.Start)
+                        .alignItems(HorizontalAlign.Start)
+                      }
+                      .width('100%')
+                      .height(100)
+                    }
+                    .margin(5)
+                    .padding(5)
+                    .borderWidth(1)
+                  })
+                }
               }
-              .width('100%')
             }
 
             // About Author
@@ -445,7 +594,6 @@ struct Index {
 
           Column() {
             this.floatIconBuilder($r('app.media.icon_top'), () => {
-              // this.scroller.scrollEdge(Edge.Top)
               this.smoothScrollToTop()
             })
             this.floatIconBuilder($r('app.media.icon_badge'), () => {
@@ -453,7 +601,9 @@ struct Index {
                 url: 'pages/StarPage'
               })
             })
-            this.floatIconBuilder($r('app.media.icon_search'))
+            this.floatIconBuilder($r('app.media.icon_search'), () => {
+              this.isSearchIconClick = !this.isSearchIconClick
+            })
           }
           .margin({ right: 20, bottom: 20 })
         }
