@@ -621,7 +621,7 @@ function titleTextStyle(fontColor: string | ResourceColor) {
   .fontSize(40)
   .fontWeight(FontWeight.Bolder)
   .fontColor(fontColor)
-  .fontFamily('ExtraBold')
+  // .fontFamily('ExtraBold')
 }
 
 @Extend(Image)
@@ -645,5 +645,5 @@ function swiperImageStyle(game: Game) {
 function textStyle() {
   .fontSize(20)
   .fontWeight(600)
-  .fontFamily('Poppins')
+  // .fontFamily('Poppins')
 }
